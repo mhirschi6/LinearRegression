@@ -1,0 +1,290 @@
+---
+title: "Hard Work 2 (Part 1)"
+output: 
+  html_document:
+    theme: cerulean
+    code_folding: hide
+---
+
+
+## Instructions
+
+1. Study Sections 2.1-2.6 of Chapter 2: "Inferences in Regression and Correlation Analysis."    
+<span id="note">(Next week we will study Sections 2.7-2.10.)</span>
+
+2. Attempt and submit at least <span id=points style="padding-left:0px;">{47}</span> Hard Work Points by Saturday at 11:59 PM.    
+<span id=note>Over <span id=points style="padding-left:0px;">{52}</span> gets you {+1} Final Exam Point.</span>    
+<span id=note>Over <span id=points style="padding-left:0px;">{60}</span> gets you {+2} Final Exam Points.</span>    
+<span id=note>Over <span id=points style="padding-left:0px;">{67}</span> gets you {+3} Final Exam Points.</span>
+
+<br/>
+
+
+
+## Reading Points <span id=headpoints>{23} Possible</span>
+
+### Section 2.1 <span id=recpoints>{6}</span><span id=report>{ A=6 | E=4 }</span>
+
+### Section 2.2 <span id=recpoints>{3}</span><span id=report>{ A=3| E=2
+}</span>
+
+### Section 2.3 <span id=recpoints>{1}</span><span id=report>{ A=1 | E=1 }</span>
+
+### Section 2.4 <span id=recpoints>{4}</span><span id=report>{ A=4 | E=3 }</span>
+
+### Section 2.5 <span id=recpoints>{6}</span><span id=report>{ A=6 | E=4 }</span>
+
+### Section 2.6 <span id=recpoints>{3}</span><span id=report>{ A=3 | E=2 }</span>
+
+
+
+<br/>
+
+
+
+
+## Theory Points <span id=headpoints>{33} Possible</span>
+
+### Problem 2.1 <span id=points>{1}</span><span id=report>{ A=0 | E=0 }</span>
+ 
+### Problem 2.2 <span id=points>{1}</span><span id=report>{ A=0 | E=0 }</span>
+ 
+### Problem 2.3 <span id=points>{1}</span><span id=report>{ A=0 | E=0 }</span>
+
+### Problem 2.18 <span id=points>{1}</span><span id=report>{ A=0 | E=0 }</span>
+<span id=headnote>Hint: Read page 71</span>
+ 
+### Problem 2.19 <span id=points>{1}</span><span id=report>{ A=0 | E=0 }</span>
+
+### Problem 2.20 or 2.21 or 2.22 <span id=points>{1}</span><span id=report>{ A=0 | E=0 }</span>
+
+### Problem 2.33 <span id=recpoints>{3}</span><span id=report>{ A=3| E=1 }</span>
+
+```{r}
+#Alternative Hypthosize is that it does not equaly $7.5 thousand. 
+
+#B
+
+#c
+#you cannot
+
+
+```
+
+
+### Problem 2.51 <span id=points>{2}</span><span id=report>{ A=0 | E=0 }</span>
+
+### Exercise 2.55 <span id=recpoints>{2}</span><span id=report>{ A=2 | E=0 }</span>
+
+```{r}
+# summation of Yi = Beta0 + Beta1 * Xi
+```
+
+
+### Exercise 2.57 <span id=points>{3}</span><span id=report>{ A=0 | E=0 }</span>
+
+### Exercise 2.61 <span id=points>{3}</span><span id=report>{ A=0 | E=0 }</span>
+
+ 
+
+<br/>
+
+
+
+## Application Points <span id=headpoints>{53} Possible</span>
+
+<a id=datalink target="_blank" href=http://www.stat.ufl.edu/~rrandles/sta4210/Rclassnotes/data/textdatasets/index.html>Data Files</a>
+
+
+### Problem 2.1 <span id=points>{1}</span><span id=report>{ A=0 | E=0 }</span>
+
+### Problem 2.4 <span id=recpoints>{4}</span><span id=report>{ A=4 | E=2 }</span>
+
+```{r p4}
+# Load the Data:
+p1.19 <- read.table("http://users.stat.ufl.edu/~rrandles/sta4210/Rclassnotes/data/textdatasets/KutnerData/Chapter%20%201%20Data%20Sets/CH01PR19.txt")
+
+# Rewrite the column names to be "Y" and "X" to match the textbook:
+colnames(p1.19) <- c("Y","X")
+```
+
+```{r}
+mydata <- p1.19
+
+summary(mydata)
+ 
+mylm <- lm(X~Y, data = mydata)
+#plot(x=X, y=Y, data = mylm)
+#abline(mylm)
+coef(mylm, .95)
+summary(mylm)
+```
+
+
+### Problem 2.5 <span id=recpoints>{4}</span><span id=report>{ A=4 | E=0 }</span> 
+
+```{r p5}
+# Load the Data:
+p1.20 <- read.table("http://users.stat.ufl.edu/~rrandles/sta4210/Rclassnotes/data/textdatasets/KutnerData/Chapter%20%201%20Data%20Sets/CH01PR20.txt")
+
+# Rewrite the column names to be "Y" and "X" to match the textbook:
+colnames(p1.20) <- c("Y","X")
+```
+
+```{r}
+dat <- p1.20
+summary(dat)
+ 
+mylm <- lm(X~Y, data = dat)
+#plot(x=X, y=Y, data = mylm)
+#abline(mylm)
+coef(mylm, .90)
+summary(mylm)
+
+```
+
+### Problem 2.7 <span id=points>{3}</span><span id=report>{ A=0 | E=0 }</span> 
+
+```{r p7}
+# Load the Data:
+p1.22 <- read.table("http://users.stat.ufl.edu/~rrandles/sta4210/Rclassnotes/data/textdatasets/KutnerData/Chapter%20%201%20Data%20Sets/CH01PR22.txt")
+
+# Rewrite the column names to be "Y" and "X" to match the textbook:
+colnames(p1.22) <- c("Y","X")
+```
+
+
+### Problem 2.10 <span id=recpoints>{2}</span><span id=report>{ A=2 | E=2 }</span> 
+
+```{r}
+#A Predicction Ionterval
+#B Confidence Interval
+#C Prediction Interval 
+```
+
+### Problem 2.13 <span id=recpoints>{4}</span><span id=report>{ A=4 | E=1 }</span> 
+
+```{r p13}
+# Load the Data:
+p1.19 <- read.table("http://users.stat.ufl.edu/~rrandles/sta4210/Rclassnotes/data/textdatasets/KutnerData/Chapter%20%201%20Data%20Sets/CH01PR19.txt")
+
+# Rewrite the column names to be "Y" and "X" to match the textbook:
+colnames(p1.19) <- c("Y","X")
+```
+
+```{r}
+dat1 <- p1.19
+
+summary(dat1)
+ 
+mylm <- lm(X~Y, data = dat1)
+plot(X~Y, data = dat1)
+#abline(mylm)
+coef(mylm, .95)
+summary(mylm)
+
+
+```
+
+### Problem 2.14 <span id=points>{4}</span><span id=report>{ A=0 | E=0 }</span> 
+
+```{r p14}
+# Load the Data:
+p1.20 <- read.table("http://users.stat.ufl.edu/~rrandles/sta4210/Rclassnotes/data/textdatasets/KutnerData/Chapter%20%201%20Data%20Sets/CH01PR20.txt")
+
+# Rewrite the column names to be "Y" and "X" to match the textbook:
+colnames(p1.20) <- c("Y","X")
+```
+
+
+### Problem 2.15 <span id=points>{4}</span><span id=report>{ A=0 | E=0 }</span>
+
+```{r p15}
+# Load the Data:
+p1.21 <- read.table("http://users.stat.ufl.edu/~rrandles/sta4210/Rclassnotes/data/textdatasets/KutnerData/Chapter%20%201%20Data%20Sets/CH01PR21.txt")
+
+# Rewrite the column names to be "Y" and "X" to match the textbook:
+colnames(p1.21) <- c("Y","X")
+```
+
+
+### Problem 2.16 <span id=recpoints>{5}</span><span id=report>{ A=5 | E=2 }</span> 
+
+```{r p16}
+# Load the Data:
+p1.22 <- read.table("http://users.stat.ufl.edu/~rrandles/sta4210/Rclassnotes/data/textdatasets/KutnerData/Chapter%20%201%20Data%20Sets/CH01PR22.txt")
+
+# Rewrite the column names to be "Y" and "X" to match the textbook:
+colnames(p1.22) <- c("Y","X")
+```
+
+
+```{r}
+
+dat2 <- p1.22
+mylm <- lm(X~Y, data = dat2)
+plot(X~Y, data = dat2)
+#abline(mylm)
+predict(mylm, data.frame(Y = 30))
+coef(mylm)
+summary(mylm)
+```
+
+<br />
+
+
+
+ 
+
+ 
+ 
+ 
+ <style>
+#points {
+  font-size:.8em;
+  padding-left:5px;
+  font-weight:bold; 
+  color:#317eac;
+}
+
+#recpoints {
+  font-size:.8em;
+  padding-left:5px;
+  font-weight:bold; 
+  color:#7eac31;
+}
+
+#report {
+  font-size:.7em;
+  padding-left:15px;
+  font-weight:normal; 
+  color:#5a5a5a;
+}
+
+#datalink {
+  font-size:.5em;
+  color:#317eac;
+  padding-left:5px;
+}
+
+#headnote {
+  font-size:.6em;
+  color:#787878;
+}
+
+#note {
+  font-size:.8em;
+  color:#787878;
+}
+
+#headpoints {
+ font-size:12pt;
+ color: #585858; 
+ padding-left: 15px;
+}
+</style>
+
+
+ 
+
+ 
