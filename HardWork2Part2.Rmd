@@ -48,11 +48,36 @@ output:
 
 ### Problem 2.53 <span id=points>{4}</span><span id=report>{ A=0 | E=0 }</span>
 
-### Problem 2.66 <span id=recpoints>{5}</span><span id=report>{ A=0 | E=0 }</span> 
+### Problem 2.66 <span id=recpoints>{5}</span><span id=report>{ A=5 | E=5 }</span> 
 
 <span id=note>R-Code Hint: rnorm(5, 0, sqrt(25))</span>
 
+```{r}
+library(tidyverse)
+dat <- data.frame(x=c(4,8,12,16,20), error=rnorm(5,0,sqrt(25))) %>% 
+  mutate(y = 20+4*x+error)
 
+mylm <- lm(y~x, data = dat)
+summary(mylm)
+predict(mylm, interval = "confidence")
+```
+
+```{r}
+b <- matrix(NA, 200, 2)
+for (i in 1:200){
+  dat <- data.frame(x=c(4,8,12,16,20), error=rnorm(5,0,sqrt(25))) %>% 
+    mutate(y = 20+4*x+error) 
+  my_lm <- lm(y~x, data = dat) 
+  b[i,] <- coef(my_lm)
+  interval <- predict(my_lm, data.frame(x = 10), interval = "confidence")
+}
+
+hist(b[,1])
+mean(b[,1])
+sd(b[,1])
+predict(my_lm, interval = "confidence")
+
+```
 
 <br/>
 
@@ -62,7 +87,7 @@ output:
 
 <a id=datalink target="_blank" href=http://www.stat.ufl.edu/~rrandles/sta4210/Rclassnotes/data/textdatasets/index.html>Data Files</a>
 
-### Problem 2.25 <span id=recpoints>{5}</span><span id=report>{ A=0 | E=0 }</span>
+### Problem 2.25 <span id=recpoints>{5}</span><span id=report>{ A=5 | E=3 }</span>
 
 ```{r p25}
 # Load the Data:
@@ -72,8 +97,21 @@ p1.20 <- read.table("http://users.stat.ufl.edu/~rrandles/sta4210/Rclassnotes/dat
 colnames(p1.20) <- c("Y","X")
 ```
 
+```{r}
+my_lm <- lm(Y~X,data = p1.20)
+summary(my_lm)
 
-### Problem 2.26 <span id=recpoints>{4}</span><span id=report>{ A=0 | E=0 }</span>
+anova(my_lm)
+#a 1 numerator 43 denomitor df sum sq 76960 & 3416
+
+#b f-value 968.66
+#c 31.1233
+summary(my_lm)
+plot(my_lm)
+#d  0.9575 0.9565
+```
+
+### Problem 2.26 <span id=recpoints>{4}</span><span id=report>{ A=4 | E=3 }</span>
 
 ```{r p26}
 # Load the Data:
@@ -83,8 +121,22 @@ p1.22 <- read.table("http://users.stat.ufl.edu/~rrandles/sta4210/Rclassnotes/dat
 colnames(p1.22) <- c("Y","X")
 ```
 
+```{r}
+my.lm <- lm(Y~X, data = p1.22)
+summary(my.lm)
+anova(my.lm)
 
-### Problem 2.29 <span id=recpoints>{5}</span><span id=report>{ A=0 | E=0 }</span> 
+plot(Y~X, data = p1.22)
+abline(my.lm)
+
+plot(Y~X, data = p1.22)
+abline(my.lm)
+abline(h=mean(p1.22$Y))
+
+#c R^2 shows the precentage of data corrilates to the fitted line. 
+```
+
+### Problem 2.29 <span id=recpoints>{5}</span><span id=report>{ A=5 | E=4 }</span> 
 
 ```{r p29}
 # Load the Data:
@@ -92,6 +144,23 @@ p1.27 <- read.table("http://users.stat.ufl.edu/~rrandles/sta4210/Rclassnotes/dat
 
 # Rewrite the column names to be "Y" and "X" to match the textbook:
 colnames(p1.27) <- c("Y","X")
+```
+
+```{r}
+lm_my  <- lm(Y~X, data = p1.27)
+plot(Y~X, data = p1.27)
+abline(lm_my)
+
+plot(Y~X, data = p1.27)
+abline(lm_my)
+abline(h = mean(p1.27$Y))
+
+anova(lm_my)
+
+#
+
+
+
 ```
 
 

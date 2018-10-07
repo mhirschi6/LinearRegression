@@ -101,3 +101,16 @@ anova(reduced,full)
 #RSS = SSE
 
 anova(full)
+
+
+E{Y} Confidence band
+E{Yi}Confidence interval for E{Yi} predeict (,interval = "confidence")
+BEta0 Confidence interval confint(mylm)
+Beta1 Ditto
+Epsilon1 
+MSE = SSE / N - 2 
+sigma ^ 2 
+
+predict(my_lm, intveral = "predict")
+
+
