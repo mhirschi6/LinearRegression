@@ -1,0 +1,299 @@
+---
+title: "Hard Work 3"
+output: 
+  html_document:
+    theme: cerulean
+    toc: true
+    toc_float: true
+    code_folding: hide
+---
+
+## Instructions
+
+1. Study Sections 3.1-3.8 of Chapter 3: "Diagnostics and Remedial Measures."    
+<span id=note>(We will study more of Chapter 3 next week.)</span>
+
+
+2. Attempt and submit at least <span id=points style="padding-left:0px;">{52}</span> Hard Work Points by Saturday at 11:59 PM.    
+<span id=note>Over <span id=points style="padding-left:0px;">{56}</span> gets you {+1} Final Exam Point.</span>    
+<span id=note>Over <span id=points style="padding-left:0px;">{62}</span> gets you {+2} Final Exam Points.</span>    
+<span id=note>Over <span id=points style="padding-left:0px;">{70}</span> gets you {+3} Final Exam Points.</span>
+
+## Reading Points <span id=headpoints>{30} Possible</span>
+
+<div style="padding-left:20px;">
+
+### Section 3.1 <span id=recpoints>{2}</span><span id=report>{ 2/1 }</span>
+
+### Section 3.2 <span id=recpoints>{2}</span><span id=report>{ 2/ 1}</span>
+
+### Section 3.3 <span id=recpoints>{8}</span><span id=report>{8 / 4}</span>
+
+### Section 3.4 <span id=recpoints>{2}</span><span id=report>{ 2/1 }</span>
+
+### Section 3.5 <span id=recpoints>{2}</span><span id=report>{ 2/1 }</span>
+
+### Section 3.6 <span id=recpoints>{6}</span><span id=report>{ 6/ 3}</span>
+
+### Section 3.7 <span id=recpoints>{7}</span><span id=report>{ 7/ 3}</span>
+
+### Section 3.8 <span id=recpoints>{1}</span><span id=report>{ 1/1 }</span>
+
+</div>
+
+## Theory Points <span id=headpoints>{9} Possible</span>
+
+<div style="padding-left:20px;">
+
+### 3.1 <span id=recpoints>{2}</span><span id=report>{ 2/2 }</span>
+```{r}
+#A residuals stay on the scale that the data is on semi-studentized residual is scaling the data to put on the same scale. to show outliers. 
+#B expected value of epsilon compared to the ebar is the mean of e. 
+#C error term is the deviation of the observervation to the true term. The residual is the difference between the observered value and the estimated value. 
+```
+
+ 
+### 3.12 <span id=points>{2}</span><span id=report>{ / }</span>
+
+### 3.21 <span id=points>{3}</span><span id=report>{ / }</span>
+
+### 3.23 <span id=points>{2}</span><span id=report>{ / }</span>
+
+
+</div>
+
+
+## Application Points <span id=headpoints>{32} Possible</span>
+
+<div style="padding-left:20px;">
+
+<a id=datalink style="font-size:.9em;" target="_blank" href=http://www.stat.ufl.edu/~rrandles/sta4210/Rclassnotes/data/textdatasets/index.html>Data Files</a>
+
+### 3.3 <span id=recpoints>{6}</span><span id=report>{6 / 4}</span>
+
+```{r p33}
+# Load the Data:
+p3.3 <- read.table("http://users.stat.ufl.edu/~rrandles/sta4210/Rclassnotes/data/textdatasets/KutnerData/Chapter%20%203%20Data%20Sets/CH03PR03.txt")
+
+# Rewrite the column names to be "Y" and "X" to match the textbook:
+colnames(p3.3) <- c("Y","X")
+```
+
+```{r}
+library(tidyverse)
+library(mosaic)
+library(alr3)
+library(lmtest)
+library(onewaytests)
+dat <- p3.3
+my_lm <- lm(Y~X, data = dat)
+#A
+dat %>% 
+  ggplot(aes(x = X, y = Y))+
+  geom_boxplot()
+#B
+dat %>% 
+  ggplot(aes(x = X, y = Y))+
+  geom_point()
+
+#C
+plot(my_lm$residuals, type = "b")
+
+#D
+plot(my_lm$residuals, type = "o")
+cor(dat$X, dat$Y)
+#E
+
+```
+
+### 3.4 <span id=recpoints>{6}</span><span id=report>{ 6/ 2}</span>
+
+```{r p34}
+# Load the Data:
+p3.4 <- read.table("http://users.stat.ufl.edu/~rrandles/sta4210/Rclassnotes/data/textdatasets/KutnerData/Chapter%20%203%20Data%20Sets/CH03PR04.txt")
+
+# Rewrite the column names to be "Y" and "X" to match the textbook:
+colnames(p3.4) <- c("Y","X")
+```
+
+```{r}
+dat1 <- p3.4
+lm_my <- lm(Y~X, data = dat1)
+
+#A
+dat1 %>% 
+  ggplot(aes(x = X, y = Y))+
+  geom_point()
+#that as x gets bigger y gets bigger as well. I don't see any outlying variables. 
+
+#B
+plot(dat1$X, type = "l")
+
+#C
+stem(lm_my$residuals)
+
+#E
+plot(lm_my$residuals, type = "o")
+cor(dat$X, dat$Y)
+
+
+```
+
+
+### 3.5 <span id=recpoints>{5}</span><span id=report>{ 5/ 2}</span>
+
+```{r p35}
+# Load the Data:
+p1.21 <- read.table("http://www.stat.ufl.edu/~rrandles/sta4210/Rclassnotes/data/textdatasets/KutnerData/Chapter%20%201%20Data%20Sets/CH01PR21.txt")
+
+# Rewrite the column names to be "Y" and "X" to match the textbook:
+colnames(p1.21) <- c("Y","X")
+```
+
+```{r}
+dat2 <- p1.21
+my_lm1 <- lm(Y~X, data = dat2)
+#A
+dat2 %>% 
+  ggplot(aes(x = X, y = Y))+
+  geom_point()
+#Yes it appears to be assymetic. 
+
+#B
+plot(dat2$X, type = "l")
+#Mostly there is an outlier but it looks pretty asymmetric. The outlier is right in the middle but it helps with the asymmetric look. 
+
+#C
+stem(my_lm1$residuals)
+
+#D
+```
+
+
+### 3.6 <span id=points>{5}</span><span id=report>{ / }</span>
+
+```{r p36}
+# Load the Data:
+p1.22 <- read.table("http://www.stat.ufl.edu/~rrandles/sta4210/Rclassnotes/data/textdatasets/KutnerData/Chapter%20%201%20Data%20Sets/CH01PR22.txt")
+
+# Rewrite the column names to be "Y" and "X" to match the textbook:
+colnames(p1.22) <- c("Y","X")
+```
+
+
+### 3.7 <span id=points>{4}</span><span id=report>{ / }</span>
+
+```{r p37}
+# Load the Data:
+p1.27 <- read.table("http://www.stat.ufl.edu/~rrandles/sta4210/Rclassnotes/data/textdatasets/KutnerData/Chapter%20%201%20Data%20Sets/CH01PR27.txt")
+
+# Rewrite the column names to be "Y" and "X" to match the textbook:
+colnames(p1.27) <- c("Y","X")
+```
+
+
+### 3.8 <span id=points>{3}</span><span id=report>{ / }</span>
+
+```{r p38}
+# Load the Data:
+p1.28 <- read.table("http://www.stat.ufl.edu/~rrandles/sta4210/Rclassnotes/data/textdatasets/KutnerData/Chapter%20%201%20Data%20Sets/CH01PR28.txt")
+
+# Rewrite the column names to be "Y" and "X" to match the textbook:
+colnames(p1.28) <- c("Y","X")
+```
+
+
+### 3.13 <span id=recpoints>{3}</span><span id=report>{ 3/ 1}</span>
+
+```{r p313}
+# Load the Data:
+p1.20 <- read.table("http://www.stat.ufl.edu/~rrandles/sta4210/Rclassnotes/data/textdatasets/KutnerData/Chapter%20%201%20Data%20Sets/CH01PR20.txt")
+
+# Rewrite the column names to be "Y" and "X" to match the textbook:
+colnames(p1.20) <- c("Y","X")
+```
+
+```{r}
+dat3 <- p1.20
+my_lm2 <- lm(Y~X, data = dat3)
+
+#A 
+#The alternative conclusion is that the line does not fit a regression line. 
+
+#B
+pureErrorAnova(my_lm2)
+
+#C
+
+```
+
+
+</div>
+
+
+
+
+
+
+
+
+
+
+ <style>
+#points {
+  font-size:.8em;
+  padding-left:5px;
+  font-weight:bold; 
+  color:#317eac;
+}
+
+#recpoints {
+  font-size:.8em;
+  padding-left:5px;
+  font-weight:bold; 
+  color:#7eac31;
+}
+
+#report {
+  font-size:.7em;
+  padding-left:15px;
+  font-weight:normal; 
+  color:#5a5a5a;
+}
+
+#datalink {
+  font-size:.5em;
+  color:#317eac;
+  padding-left:5px;
+}
+
+#headnote {
+  font-size:.6em;
+  color:#787878;
+}
+
+#note {
+  font-size:.8em;
+  color:#787878;
+}
+
+#headpoints {
+ font-size:12pt;
+ color: #585858; 
+ padding-left: 15px;
+}
+</style>
+
+
+<footer>
+</footer>
+
+
+
+ 
+
+ 
+
+ 
+
+ 

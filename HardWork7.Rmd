@@ -1,0 +1,924 @@
+---
+title: "Hard Work 7"
+output: 
+  html_document:
+    theme: cerulean
+    toc: true
+    toc_float: true
+    code_folding: hide
+---
+
+```{r, message=FALSE, warning=FALSE}
+library(mosaic)
+library(car)
+library(plotly)
+library(reshape2)
+library(scatterplot3d)
+library(mosaicData)
+library(tidyverse)
+library(lmtest)
+library(readr)
+```
+
+<style>
+
+</style>
+
+## Instructions
+
+1. Study Sections 8.1-8.6 -- "Regression Models for Quantitative and Qualitative Predictors."    
+
+2. Attempt and submit at least <span id=points style="padding-left:0px;">{60}</span> Hard Work Points by Saturday at 11:59 PM.    
+<span id=note>Over <span id=points style="padding-left:0px;">{62}</span> gets you {+1} Final Exam Point.</span>    
+<span id=note>Over <span id=points style="padding-left:0px;">{66}</span> gets you {+2} Final Exam Points.</span>    
+
+
+\
+
+
+## Reading Points <span id=headpoints>{30} Possible</span>
+
+### Section 8.1 <span id=recpoints>{6}</span><span id=report>{ A=6 | E=4 }</span>
+
+### Section 8.2 <span id=recpoints>{6}</span><span id=report>{ A=6 | E=4 }</span>
+
+### Section 8.3 <span id=recpoints>{7}</span><span id=report>{ A=7 | E=5 }</span>
+
+### Section 8.4 <span id=recpoints>{3}</span><span id=report>{ A=3 | E=2 }</span>
+
+### Section 8.5 <span id=recpoints>{5}</span><span id=report>{ A=5 | E=3 }</span>
+
+### Section 8.6 <span id=recpoints>{3}</span><span id=report>{ A=3 | E=2 }</span>
+
+
+\
+
+
+
+
+
+## Theory Points <span id=headpoints>{23} Possible</span>
+
+These theory questions are to help you recognize the shape of four important regression models.
+
+```{r, fig.height=3}
+beta0 <- 6
+beta1 <- -2
+beta2 <- 3
+
+
+par(mfrow=c(1,4), mai=c(0.1,0.1,0.8,0.1), cex.main=1.5)
+
+  curve(beta0 + beta1*x, xaxt='n', yaxt='n', main="SLR Model", ylab="", xlab="", lwd=3, col="darkgray")
+  
+  curve(beta0 + beta1*x + beta2*x^2, xaxt='n', yaxt='n', main="Quadratic Model", ylab="", xlab="", lwd=3, col="darkgray")
+  
+  curve(beta0 + beta1*x, xaxt='n', yaxt='n', main="Two-lines Model", ylab="", xlab="", lwd=3, col="darkgray")
+  curve((beta0+-2) + (beta1+3)*x, xaxt='n', yaxt='n', main="Two-lines Model", ylab="", xlab="", lwd=3, col="darkgray", lty=2, add=TRUE)
+  
+  curve(beta0 + beta1*x + beta2*x^2, xaxt='n', yaxt='n', main="Double Quadratic \n Model", ylab="", xlab="", lwd=3, col="darkgray", ylim=c(5,8), xlim=c(0,1.5))
+  curve((beta0+1) + (beta1+4)*x + (beta2-5)*x^2, xaxt='n', yaxt='n', main="Double Quadratic Model", ylab="", xlab="", lwd=3, col="darkgray", lty=2, add=TRUE)
+  
+```
+
+They will also help you explore the 3d regression model.
+
+```{r, fig.height=4}
+  # 3D scatter plot
+s3d <- scatterplot3d(trees, type = "h", color = "darkgray",
+    angle=55, pch = 16, xlab="", ylab="", zlab="", main="3d Model", tick.marks=FALSE)
+# Add regression plane
+my.lm <- lm(Volume ~ Girth + Height, data=trees)
+s3d$plane3d(my.lm, col="gray", draw_polygon = TRUE)
+```
+
+
+The **SLR Model** is the Simple Linear Regression Model:
+
+$$
+  Y_i = \beta_0 + \beta_1 X_i + \epsilon_i \ \text{where} \ \epsilon_i \sim N(0,\sigma^2)
+$$
+
+Data from this model is created by defining the $X_i$, $\beta_0$, $\beta_1$, and $\sigma$ and then sampling the $\epsilon_i$ from a $N(0,\sigma^2)$ distribution.
+
+```{r}
+# Define the Xi:
+X <- c(1.6, 5.6, 8.2, 9.7, 4.1, 6.7, 4.7, 4.1, 8.4, 7.2)
+
+# Define the betas:
+beta0 <- 3
+beta1 <- 2.5
+
+# Define sigma:
+sigma <- 1.2
+
+# Obtain a sample of the epsilon_i (10 of them) from a normal distribution with mean of 0 and standard deviation sigma:
+set.seed(121) #Ensures the same "random" sample each time you knit.
+epsilon <- rnorm(10, 0, sigma)
+
+# Create the Yi using the model:
+Y <- beta0 + beta1*X + epsilon
+
+# Plot the data:
+plot(Y ~ X, pch=16, col="darkgray")
+
+# Plot the true regression equation with a dashed line:
+curve(beta0 + beta1*x, add=TRUE, col="darkgray", lty=2)
+
+# Obtain the fitted regression equation and plot:
+slr_lm <- lm(Y ~ X)
+abline(slr_lm, col="darkgray")
+
+# Add a legend:
+legend("topleft", bty="n", legend=c("True Line", "Fitted Line"), lty=c(2,1), col="gray", lwd=3)
+```
+
+Notice that a 95% confidence interval for $\beta_0$ is $(`r paste(round(confint(slr_lm)[1,],2), collapse=", ")`)$ and for $\beta_1$ is $(`r paste(round(confint(slr_lm)[2,],2), collapse=", ")`)$ which is impressive because $\beta_0 = 3$ and $\beta_1 = 2.5$. This shows the regression was quite good at uncovering the truth as both parameters fit inside their respective confidence intervals.
+
+
+
+
+
+
+### Theory 1: SLR Model <span id=recpoints>{4}</span><span id=report>{ A=4 | E=4 }</span>
+
+Show a scatterplot, true regression function $E\{Y\}$, and fitted regression function $\hat{Y}$, all on a single graphic, for data you fabricate using the simple linear regression model:
+
+$$
+  Y_i = \beta_0 + \beta_1 X_{i} + \epsilon_i \quad \text{(SLR Model)}
+$$
+
+where $\epsilon_i \sim N(0,\sigma^2)$. Use the values of $\beta_0 = 6$ and $\beta_1 = -2$. Further, use the ten x-values provided in the code below.
+
+#### Answer 1:
+
+```{r}
+X <- c(1.3, 1.8, 1.4, 2.1, 0.9, 1.5, 1.1, 0.5, 0.1, 0.2)
+
+## Hint: rnorm(n, mean, standard deviation)
+
+beta0 <- 8
+beta1 <- -2
+sigma <- 1.5
+epsilon <- rnorm(10, 0, sigma)
+Y <- beta0 + beta1*X + epsilon
+
+
+one_lm <- lm(Y~X)
+plot(Y ~ X, pch=16, col="blue")
+curve(beta0 + beta1*x, add=TRUE, col="darkgray", lty=2)
+abline(one_lm)
+
+```
+
+----
+
+Provide confidence intervals for each of your coefficients and briefly write about how well your fitted model captured the true model. 
+
+#### Answer 2:
+
+
+```{r}
+one_lm$coefficients
+confint(one_lm)
+
+```
+
+The true model and the fitted model don't fit well at all. 
+
+How does your choice of $\sigma$ impact the results of the regression? (You may have to change $\sigma$ and re-run the code a few times to see what happens.)
+
+#### Answer 3:
+
+
+The sigma shows how much the points deviate from the true line. 
+
+What effect does each coefficient $\beta_0$ and $\beta_1$ have on the regression model? Change each coefficient one at a time and re-run the code to get a feel for what happens.
+
+#### Answer 4:
+
+
+When you change the betas it changes the slope of the line and the y intercept of the line. 
+
+
+\ 
+
+
+
+
+### Theory 2: Quadratic Model <span id=recpoints>{4}</span><span id=report>{ A=4 | E=4 }</span>
+
+Show a scatterplot, true regression function $E\{Y\}$, and fitted regression function $\hat{Y}$, all on a single graphic, for data you fabricate using the quadratic regression model:
+
+$$
+  Y_i = \beta_0 + \beta_1 X_{i} + \beta_2 X_{i}^2 + \epsilon_i \quad \text{(Quadratic Model)}
+$$
+
+where $\epsilon_i \sim N(0,\sigma^2)$. Use the values of $\beta_0 = 6$, $\beta_1 = -2$ and $\beta_2 = 3$. Further, use the ten x-values provided in the code below.
+
+#### Answer 1:
+
+```{r}
+X <- c(1.3, 1.8, 1.4, 2.1, 0.9, 1.5, 1.1, 0.5, 0.1, 0.2)
+
+## Hint: rnorm(n, mean, standard deviation)
+beta_0 <- 8
+beta_1 <- -6
+beta_2 <- 4
+sigma <- 9
+epsilon <- rnorm(10, 0, sigma)
+Y <- beta_0 + beta_1*X + beta_2*X^2 + epsilon
+
+
+two_lm <- lm(Y~X + I(X^2))
+plot(Y ~ X, pch=16, col="blue")
+abline(one_lm)
+curve(beta_0 + beta_1*x + beta_2*x^2, add=TRUE, col="darkgray", lty=2)
+
+```
+
+----
+
+Provide confidence intervals for each of your coefficients and briefly write about how well your fitted model captured the true model. 
+
+#### Answer 2:
+
+
+```{r}
+two_lm$coefficients
+confint(two_lm)
+```
+
+The bigger I made the sigma the better the fitted model captured the true model. It gave the cofidence interval a closer which less deviation. 
+
+How does your choice of $\sigma$ impact the results of the regression? (You may have to change $\sigma$ and re-run the code a few times to see what happens.)
+
+#### Answer 3:
+
+
+The choice of sigma changes the rate at which the regression line tries to capture all the points. When the sigma was bigger the closer the fitted line was to the true line. 
+
+What effect does each coefficient $\beta_0$, $\beta_1$, and $\beta_2$ have on the regression model? Change each coefficient one at a time and re-run the code to get a feel for what happens.
+
+#### Answer 4:
+
+
+The change how close the two lines are to each other and how the regression line interacts with the data. 
+
+
+\ 
+
+
+
+
+
+### Theory 3: Two-lines Model <span id=recpoints>{4}</span><span id=report>{ A=4 | E=4 }</span>
+
+Show a scatterplot, true regression function $E\{Y\}$, and fitted regression function $\hat{Y}$, all on a single graphic, for data you fabricate using the two-lines regression model:
+
+$$
+  Y_i = \beta_0 + \beta_1 X_{i1} + \beta_2 X_{i2} + \beta_3 X_{i1} X_{i2} + \epsilon_i \quad \text{(Two-lines Model)}
+$$
+
+where $\epsilon_i \sim N(0,\sigma^2)$. Use the values of $\beta_0 = 6$, $\beta_1 = -2$, $\beta_2 = -2$, and $\beta_3 = 4$. Further, use the ten x-value pairs provided in the code below.
+
+#### Answer 1:
+
+```{r}
+X1 <- c(3.5, 2.8, 5.4, 8.1, 9.9, 4.5, 2.1, 2.5, 3.1, 9.2)
+X2 <- c(0, 0, 0, 0, 1, 1, 1, 1, 1, 0)
+
+beta_0 <- 6
+beta_1 <- -2
+beta_2 <- -2
+beta_3 <- 4
+sigma <- 1.2
+epsilon <- rnorm(10, 0, sigma)
+Y <- beta_0 + beta_1*X1 + beta_2*X2 + beta_3*X1*X2 + epsilon
+
+
+three_lm <- lm(Y~ X1 + X2 + X1:X2)
+b <- three_lm$coefficients
+plot(Y ~ X1, pch=16, col=as.factor(X2))
+#abline(three_lm)
+curve(b[1] + b[2]*x, add=TRUE, col= "red", lty=2)
+curve((b[1] + b[3]) + (b[2]+b[4])*x, add = TRUE, col = "blue", lty = 2)
+
+
+```
+
+----
+
+Provide confidence intervals for each of your coefficients and briefly write about how well your fitted model captured the true model. 
+
+#### Answer 2:
+
+
+```{r}
+three_lm$coefficients
+confint(three_lm)
+```
+The confidence interval takes in 0 which makes me wonder how think about how useful the coefficients are. But the fitted model and the true model fit quite closely together. 
+
+How does your choice of $\sigma$ impact the results of the regression? (You may have to change $\sigma$ and re-run the code a few times to see what happens.)
+
+#### Answer 3:
+
+My choice in sigma doesn't affect the regression line. 
+
+
+What effect does each coefficient $\beta_0$, $\beta_1$, $\beta_2$, and $\beta_3$ have on the regression model? Change each coefficient one at a time and re-run the code to get a feel for what happens.
+
+#### Answer 4:
+
+
+Starts to push the true line downwards and farther away from the fitted line. 
+
+
+\ 
+
+
+
+
+
+### Theory 4: Double Quadratic Model <span id=recpoints>{4}</span><span id=report>{ A=4 | E=4 }</span>
+
+Show a scatterplot, true regression function $E\{Y\}$, and fitted regression function $\hat{Y}$, all on a single graphic, for data you fabricate using the double quadratic regression model:
+
+$$
+  Y_i = \beta_0 + \beta_1 X_{i1} + \beta_2 X_{i1}^2 + \quad \\
+\quad   \beta_3 X_{i2} + \beta_4 X_{i1}X_{i2} + \beta_5 X_{i1}^2X_{i2} + \epsilon_i \\
+\quad \quad \quad \quad \quad \quad\text{(Double Quadratic Model)}
+$$
+
+where $\epsilon_i \sim N(0,\sigma^2)$. Use the values of $\beta_0 = 6$, $\beta_1 = -2$, $\beta_2 = 3$, $\beta_3 = 1$, $\beta_4 = 4$, and $\beta_5 = -5$. Further, use the ten x-value pairs provided in the code below.
+
+#### Answer 1:
+
+```{r}
+beta0 <- 8
+beta1 <- -4
+beta2 <- 6
+beta3 <- 4
+beta4 <- 4
+beta5 <- -5
+sigma <- 1.2
+epsilon <- rnorm(10, 0, sigma)
+
+X1 <- c(1.15, 0.67, 0.05, 1.05, 0.38, 0.94, 0.40, 0.80, 0.70, 0.86)
+X2 <- c(0, 0, 0, 0, 1, 1, 1, 1, 1, 0)
+
+
+Y <- beta0 + beta1*X1+beta2*X1^2+beta3*X2+beta4*X1*X2+beta5*X1^2*X2+epsilon
+four_lm <- lm(Y ~ X1+ I(X1^2) + X2 + X1:X2 +(X1^2):X2)
+b <- four_lm$coefficients
+plot(Y ~ X1, pch=16, col="blue")
+
+
+curve(beta0 + beta1*x + beta2*x^2, add=TRUE, col="darkgray", lty=2)
+curve((beta0 + beta3) + (beta1 + beta4)*x + (beta2 + beta5)*x^2, add = TRUE, col = "blue", lty = 2)
+curve(b[1] + b[2] * x + b[3] * x^2 + b[4]*x + b[5]*x^2, add = TRUE, col = "red")
+```
+
+----
+
+Provide confidence intervals for each of your coefficients and briefly write about how well your fitted model captured the true model. 
+
+#### Answer 2:
+
+
+```{r}
+confint(four_lm)
+four_lm$coefficients
+```
+
+The confidence intervals are very close together this shows that at 95% we can say the true mean lies between 6.618769 and 8.9885841
+
+How does your choice of $\sigma$ impact the results of the regression? (You may have to change $\sigma$ and re-run the code a few times to see what happens.)
+
+#### Answer 3:
+
+The bigger the sigma is the closer the fitted line is to the regression line. 
+
+
+What effect does each coefficient $\beta_0$, $\beta_1$, $\beta_2$, and $\beta_3$ have on the regression model? Change each coefficient one at a time and re-run the code to get a feel for what happens.
+
+#### Answer 4:
+
+
+Beta0 moves the fitted line farther away, beta1 moved it to a negative slope, beta2 moved it to a very aggressive positive slope that wasn't even close to the true line, beta4 made it more perpendicular than closely related. 
+
+
+\ 
+
+
+
+
+
+
+### Theory 5: 3D Model <span id=recpoints>{4}</span><span id=report>{ A=4 | E=3 }</span>
+
+Below is shown a scatterplot and fitted regression function $\hat{Y}$ for the three-dimensional regression model:
+
+$$
+  Y_i = \beta_0 + \beta_1 X_{i1} + \beta_2 X_{i2} + \epsilon_i \quad \text{(3D Model)}
+$$
+
+where $\epsilon_i \sim N(0,\sigma^2)$. 
+
+#### Answer 1:
+
+```{r, warning=FALSE}
+## Hint: library(car) has a scatterplot 3d function which is simple to use
+#  but the code should only be run in your console, not knit.
+
+## library(car)
+## scatter3d(Y ~ X1 + X2, data=yourdata)
+
+
+
+## To embed the 3d-scatterplot inside of your html document is harder.
+#library(plotly)
+#library(reshape2)
+
+#Perform the multiple regression
+air_lm <- lm(Ozone ~ Temp + Month, data= airquality)
+
+
+#Graph Resolution (more important for more complex shapes)
+graph_reso <- 0.5
+
+#Setup Axis
+axis_x <- seq(min(airquality$Temp), max(airquality$Temp), by = graph_reso)
+axis_y <- seq(min(airquality$Month), max(airquality$Month), by = graph_reso)
+
+#Sample points
+air_surface <- expand.grid(Temp = axis_x, Month = axis_y, KEEP.OUT.ATTRS=F)
+air_surface$Z <- predict.lm(air_lm, newdata = air_surface)
+air_surface <- acast(air_surface, Month ~ Temp, value.var = "Z") #y ~ x
+
+#Create scatterplot
+plot_ly(airquality, 
+        x = ~Temp, 
+        y = ~Month, 
+        z = ~Ozone,
+        text = rownames(airquality), 
+        type = "scatter3d", 
+        mode = "markers") %>%
+  add_trace(z = air_surface,
+            x = axis_x,
+            y = axis_y,
+            type = "surface")
+
+
+```
+
+
+
+
+----
+
+Provide confidence intervals for each of the coefficients of this regression model. 
+
+#### Answer 2:
+
+
+```{r}
+confint(air_lm)
+
+```
+
+----
+
+What is the estimated value of $\sigma$ for this model?
+
+#### Answer 3:
+
+```{r}
+summary(air_lm)
+sqrt(23.34)
+```
+
+
+
+Do you think this regression model fits the data well?
+
+#### Answer 4:
+
+
+Yes
+
+How would the shape of the regression model change if the values of $\beta_0$, $\beta_1$, and $\beta_2$ were each changed separately? 
+
+#### Answer 5:
+
+
+beta0 would change how close it was to the regression line, beta1 would change the slope of the line and beta2 would change which direction the line is going. 
+
+\
+
+
+
+### Theory 6 <span id=points>{3}</span><span id=report>{ A=0 | E=0 }</span>
+
+Fabricate a dataset using a regression model and normally distributed errors that generates a picture almost identical to the scatterplot in **Application Problem 1**.
+
+#### Answer:
+
+```{r}
+
+```
+
+
+----
+
+
+
+\
+
+\
+
+
+
+
+## Application Points <span id=headpoints>{20} Possible</span>
+
+
+### Application 1 <span id=recpoints>{3}</span><span id=report>{ A=3 | E=3 }</span>
+
+Consider the scatterplot shown here of a single residence's monthly gas bill according to the month of the year. See `?Utilities` for more details on the data.
+
+```{r}
+model <- lm(month~gasbill, data = Utilities)
+summary(model)
+plot(gasbill ~ month, data=Utilities, main="Single Residence in Minnisota", xlab="Month of the Year", ylab="Monthly Gas Bill (US Dollars)")
+abline(model)
+```
+
+Add the estimated regression function to the scatterplot above and state the function below.
+
+#### Answer 1:
+
+$$
+  \hat{Y}_i =  \beta_0 + \beta_1 X_{i} + \beta_2 X_{i}^2 + \epsilon_i \quad \text{(Quadratic Model)}
+$$
+
+
+----
+
+Diagnose the appropriateness of this regression model. How well does it fit the data? 
+
+The regression model doesn't fit with this data. There isn't equal variance. The data isn't normally distrubted. 
+
+
+<span style="font-size:.8em;">Be sure to provide diagnostic plots and supporting arguments for your claims.</span>
+
+#### Answer 2:
+
+```{r}
+plot(model)
+```
+
+
+----
+
+What range of possible gas bill amounts do you predict for the September bill? How confident are you in your prediction?
+
+#### Answer 3:
+
+```{r}
+predict(model, data.frame(gasbill = 9), interval = "prediction")
+```
+
+The gas bill will range between 0.7554471 and 14.10907 with it most likely being 7.432259. I am about 95% confident about this prediciton. 
+
+\
+
+
+
+
+
+### Application 2 <span id=recpoints>{3}</span><span id=report>{ A=3 | E=3 }</span>
+
+View the `mtcars` dataset and corresponding help file `?mtcars`.
+
+Perform a regression that predicts the miles per gallon `mpg` of the vehicle based on the quarter mile time `qsec` and transmission type `am` of the vehicle.
+
+Plot the data and your fitted regression model.
+
+#### Answer 1:
+
+```{r}
+cars_lm <- lm(mpg ~ qsec * am, data = mtcars)
+summary(cars_lm)
+coef <- cars_lm$coefficients
+plot(mpg ~ qsec, data = mtcars, pch=16, col=as.factor(am))
+#abline(cars_lm)
+curve(coef[1] + coef[2]*x, add=TRUE, col= "red", lty=2)
+curve((coef[1] + coef[3]) + (coef[2]+coef[4])*x, add = TRUE, col = "blue", lty = 2)
+
+
+```
+
+
+----
+
+State the fitted regression model.
+
+#### Answer 2:
+
+$$
+  \hat{Y}_i = -9.0099 + 1.4385X{i}{1} + 14.5107X{i}{2} + 1.3214X{i}{1}X{i}{2} + \epsilon_i \\
+$$
+
+
+----
+
+Perform an appropriate test to determine if the interaction term is needed in this regression model.
+
+#### Answer 3:
+
+```{r}
+summary(cars_lm)
+```
+looking at the p-value the interaction is not significant. 
+
+
+
+Diagnose the appropriateness of this regression model. How well does it fit the data? 
+
+<span style="font-size:.8em;">Be sure to provide diagnostic plots and supporting arguments for your claims.</span>
+
+#### Answer 4:
+
+```{r}
+plot(cars_lm)
+```
+The regression model does fit with this data. There is equal variance. The data is normally distrubted.  
+
+
+
+\
+
+
+
+
+
+### Application 3 <span id=recpoints>{4}</span><span id=report>{ A=4 | E=4 }</span>
+
+View the `mtcars` dataset and corresponding help file `?mtcars`.
+
+Perform a regression that predicts the quarter mile time `qsec` of the vehicle based on the displacement of the engine `disp` and transmission type `am` of the vehicle.
+
+Plot the data and your fitted regression model.
+
+#### Answer 1:
+
+```{r}
+mt_lm <- lm(qsec ~ disp + I(disp^2), data = mtcars)
+summary(mt_lm)
+b <- mt_lm$coefficients
+plot(qsec ~ disp, data = mtcars, col = as.factor(am))
+curve(b[1] + b[2]*x + b[3]*x^2, add = TRUE, col = "red", lty = 2)
+
+
+
+
+```
+
+
+----
+
+State the fitted regression model.
+
+#### Answer 2:
+
+$$
+  \hat{Y}_i = 2.052575e+01 + -1.894663e-02X{i} + 2.487614e-.05X{i}^2 + \epsilon_i \\
+$$
+
+
+----
+
+Perform appropriate tests to determine which interaction terms are needed in this regression model.
+
+#### Answer 3:
+
+```{r}
+summary(mt_lm)
+```
+
+
+The interaction term that is needed is the transmission style. 
+
+Diagnose the appropriateness of this regression model. How well does it fit the data? 
+
+<span style="font-size:.8em;">Be sure to provide diagnostic plots and supporting arguments for your claims.</span>
+
+#### Answer 4:
+
+```{r}
+plot(mt_lm)
+qqPlot(mt_lm)
+bptest(mt_lm)
+```
+
+
+This model fits very well to the data. The variance is equal and the data is normally distrubuted. The Breusch Pagan test accepts the null of fit. 
+
+\
+
+
+
+
+
+### Application 4 <span id=recpoints>{5}</span><span id=report>{ A=5 | E=4 }</span>
+
+View the `mtcars` dataset and corresponding help file `?mtcars`.
+
+Create a meaningful 3-dimensional regression and scatterplot of your own choosing.
+
+Plot the data and your fitted regression model.
+
+#### Answer 1:
+
+```{r}
+#I have my 3D plot but couldn't get it in the markdown will upload it with everything. 
+last_lm <-  lm(mpg ~ cyl * hp, data = mtcars)
+summary(last_lm)
+```
+
+
+
+State the fitted regression model.
+
+#### Answer 2:
+
+$$
+  \hat{Y}_i = mpg + cylX{i}{1} + hpX{i}{2} + cyl:hpX{i}{1}X{i}{2} + \epsilon_i \\
+$$
+
+
+----
+
+Provide 95% confidence intervals for each parameter in your regression model. Discuss what they show about your model?
+
+#### Answer 3:
+
+```{r}
+confint(last_lm)
+```
+
+
+The confidence interval shows that the cylinder and the horse power are appropriate variables for this model in determining miles per gallon. This shows the interaction is very useful in determining miles per gallon and the confidence interval is very close which means if we did a predict we could get very close to the actual miles per gallon. 
+
+Diagnose the appropriateness of this regression model. How well does it fit the data? 
+
+<span style="font-size:.8em;">Be sure to provide diagnostic plots and supporting arguments for your claims.</span>
+
+#### Answer 4:
+
+```{r}
+qqPlot(last_lm)
+bptest(last_lm)
+```
+
+
+We accept the null that the data is fit for linear regression. 
+
+\
+
+
+
+
+
+### Application 5 <span id=points>{5}</span><span id=report>{ A=0 | E=0 }</span>
+
+View the `Births78` dataset and corresponding help file `?Births78`.
+
+```{r}
+plot(births ~ day_of_year, data=Births78, main="1978 Daily Birth Totals", xlab="Day of the Year", ylab="Number of Births Recorded")
+```
+
+Fit an appropriate regression model to this data and draw the fitted model on the plot above.
+
+<span style="font-size:.8em;">Note that while we have considered a few basic regression models, there are infinitely many models that can be created. The quadratic model can be called a "second order model." This hints that there could be third, fourth, fifth and so on order models as well, which is true.</span>
+
+
+#### Answer 1:
+
+<center>
+Shown on plot above once complete.
+</center>
+
+----
+
+State the fitted regression model.
+
+#### Answer 2:
+
+$$
+  \hat{Y}_i = 
+$$
+
+
+----
+
+Provide a 95% confidence interval for the estimated difference between the averages of the two distinct patterns shown in the data.
+
+#### Answer 3:
+
+```{r}
+
+```
+
+
+----
+
+Diagnose the appropriateness of this regression model. How well does it fit the data? 
+
+<span style="font-size:.8em;">Be sure to provide diagnostic plots and supporting arguments for your claims.</span>
+
+#### Answer 4:
+
+```{r}
+
+```
+
+
+----
+
+
+
+
+
+<style>
+#points {
+  font-size:.8em;
+  padding-left:5px;
+  font-weight:bold; 
+  color:#317eac;
+}
+
+#recpoints {
+  font-size:.8em;
+  padding-left:5px;
+  font-weight:bold; 
+  color:#7eac31;
+}
+
+
+#rrecpoints {
+  font-size:1em;
+  padding-left:5px;
+  font-weight:bold; 
+  color:#7eac31;
+}
+
+#datalink {
+  font-size:.5em;
+  color:#317eac;
+  padding-left:5px;
+}
+
+#headnote {
+  font-size:.6em;
+  color:#787878;
+}
+
+#note {
+  font-size:.8em;
+  color:#787878;
+}
+
+#headpoints {
+ font-size:12pt;
+ color: #585858; 
+ padding-left: 15px;
+}
+
+
+
+#report {
+  font-size:.7em;
+  padding-left:15px;
+  font-weight:normal; 
+  color:#5a5a5a;
+}
+
+
+</style>
+
+
+<footer>
+</footer>
+
+
+
+ 
+
+ 
+
+ 
+
+ 

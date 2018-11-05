@@ -1,0 +1,142 @@
+---
+title: "Project 1 -- Car Buying"
+author: "Matt Hirschi"
+output: 
+  html_document:
+    theme: cerulean
+    toc: true
+    toc_float: true
+    code_folding: hide
+---
+
+## Overview
+
+The goal of this project is to come up with a vehicle "buying and selling" strategy.
+
+To be more explicit, vehicles depreciate over time. So the longer you own a vehicle and the more miles you drive with it, the less it is worth. At some point, repair costs start to outway the cost of buying something newer. So, should you buy at 20,000 miles, then sell at 80,000? Should you purchase a 2018 model, then sell it during the year 2030? What is the best "bang for your buck" when it comes to the particular vehicle you currently own (or are interested in) compared to the next vehicle you wish to own after selling (or scrapping) that one?
+
+## Step 1. Find your Data
+
+Use a dataset that is provided (in I-Learn) for this project, or collect your own data from the internet.
+
+```{r}
+library(tidyverse)
+library(alr3)
+library(janitor)
+library(mosaic)
+library(car)
+dat <- read_csv("C:/Users/hirsc/OneDrive/Documents/LinearRegression/cars.csv") 
+
+
+```
+
+```{r}
+cars_lm <- lm(price ~ mileage, data = dat)
+summary(cars_lm)
+log_lm <- lm(log(price)~mileage, data = dat)
+summary(log_lm)
+dat %>% 
+  ggplot(aes(x = mileage, y = price))+
+  geom_point()+
+  geom_smooth(method = "lm")
+
+dat %>%
+  ggplot(aes(sample = price))+
+  geom_qq()+
+  geom_qq_line()
+
+plot(cars_lm)
+
+boxCox(cars_lm)
+plot(log(price)~year, data = dat)
+  
+qqPlot(cars_lm)
+```
+
+
+## Step 2. Model the Data
+
+Whether you perform a simple, multiple, or transformation type of regression is up to you. You just need to do something useful with the data in order to reach a good "buying and selling" strategy.
+
+```{r}
+plot(log(price) ~ mileage, data = dat)
+abline(cars_lm)
+plot(log_lm)
+
+predict(cars_lm, data.frame(mileage = 60000), interval = "prediction")
+#predict(cars_lm, interval = "prediction")
+```
+
+## Step 3. Describe your Strategy
+
+Interpret your regression model and use it to develop your strategy for when to buy and sell vehicles in order to get the most "bang for your buck." 
+
+My wife and I are looking at buying a new vehicle next year when I graduate that will fit our growing family and will give us the longetivity of a newer car with little repairs but one that won't break the budget. We don't mind the year we buy but the mileage is what we are looking at. We want to buy a Chevy Traverse with 60,000 miles or less on it. We feel this will give us plenty of life on the vehicle that we won't be making a ton of repairs on it early on but that it will last many years for our family. At 60,000 miles we would expect to pay about 21,435.46 dollars with a high of $31.694.35 and a low of 11,176.57 dollars. This wide range is due to many different years and vehicles with low miles. There are a lot of variables that play into a price of a vehicle but with the mileage we are looking at this is what we would expect to pay. 
+
+
+## Grading
+
+You will be graded on two things.
+
+1. How well you apply the regression principles we have learned thus far this semester. (Think section 3.11.) 
+
+2. How well you interpret your results and describe your "buying and selling" strategy.
+
+
+
+
+
+
+
+
+<style>
+#points {
+  font-size:.8em;
+  padding-left:5px;
+  font-weight:bold; 
+  color:#317eac;
+}
+
+#recpoints {
+  font-size:.8em;
+  padding-left:5px;
+  font-weight:bold; 
+  color:#7eac31;
+}
+
+#datalink {
+  font-size:.5em;
+  color:#317eac;
+  padding-left:5px;
+}
+
+#headnote {
+  font-size:.6em;
+  color:#787878;
+}
+
+#note {
+  font-size:.8em;
+  color:#787878;
+}
+
+#headpoints {
+ font-size:12pt;
+ color: #585858; 
+ padding-left: 15px;
+}
+</style>
+
+
+<footer>
+</footer>
+
+
+
+ 
+
+ 
+
+ 
+
+ 
