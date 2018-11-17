@@ -1,0 +1,574 @@
+---
+title: "Hard Work 8"
+output: 
+  html_document:
+    theme: cerulean
+    toc: true
+    toc_float: true
+    code_folding: hide
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, message=FALSE, warning=FALSE}
+library(pander)
+library(car)
+library(mosaic)
+library(DT)
+library(tidyverse)
+```
+
+
+```{r}
+# This function will be useful later on.
+makeTable9.3 <- function(thedata, nbest=1){
+  
+  if (nbest < 1 | nbest > dim(thedata)[2]-1){
+    warning("nbest recoded to 1")
+    nbest <- 1
+  }
+  
+  cnames <- colnames(thedata)
+
+  Yat <- grep("Y",cnames)
+  
+  if (length(Yat)>1)
+    stop("Currently you have: ", paste(cnames[Yat], ", ", sep=""), 
+               " in your data set.\n There can be only one response variable.\n",
+               sep="")
+
+  colnames(thedata)[Yat] <- "Y"
+  Xat <- grep("X",cnames)
+  
+  require("leaps")
+  require("qpcR")
+
+  reg <- regsubsets(thedata[,Xat],thedata[,Yat], nbest=nbest, nvmax=length(cnames)-1)
+
+  regs <- summary(reg)
+  
+  models <- sapply(1:length(row.names(regs$which)), function(i){
+    colnames(regs$which)[which(regs$which[i,])][-1]
+  })
+  
+  pressdata <<- thedata
+  
+  PRESS <- sapply(models, function(model){
+    tmpf <- formula(paste("Y~",
+                          paste(model,
+                                c(rep("+",length(model)-1), ""), 
+                                sep="", 
+                                collapse=""), 
+                          sep=""))
+    tmp <- lm(tmpf, data=pressdata)
+    tmp$call$formula <- eval(tmpf)
+    PRESS(tmp, verbose=FALSE)$stat
+  })
+  
+  n <- nrow(thedata)
+  p <- as.numeric(row.names(regs$which))+1
+ 
+  
+  AIC <- regs$bic-log(n)*p-2*p
+
+  
+  AIC2 <- sapply(models, function(model){
+    tmpf <- formula(paste("Y~",
+                          paste(model,
+                                c(rep("+",length(model)-1), ""), 
+                                sep="", 
+                                collapse=""), 
+                          sep=""))
+    tmp <- lm(tmpf, data=pressdata)
+    tmp$call$formula <- eval(tmpf)
+    AIC(tmp)
+  })
+  
+  tmp <- data.frame(p=p, 
+             model= sapply(1:length(models), function(i) {
+                      paste(models[[i]], collapse=",")
+                    }),
+             SSEp=regs$rss,
+             R2p=regs$rsq,
+             R2ap=regs$adjr2,
+             Cp=regs$cp,
+             AICp=AIC2,
+             SBCp=regs$bic,
+             PRESSp=PRESS)
+  
+  rbind(data.frame(p=1,
+                   model="(intercept)",
+                   SSEp=regs$rss[1]/(1-regs$rsq[1]),
+                   R2p=0,
+                   R2ap=0,
+                   Cp=NA,
+                   AICp=NA,
+                   SBCp=NA,
+                   PRESSp=NA),tmp)
+}
+```
+
+## Instructions
+
+1. Study Sections 10.1 and 9.2-9.4 -- "Added Variable Plots" and "Criteria for Model Selection."
+
+2. Attempt and submit at least <span class=points style="padding-left:0px;">{43}</span> Hard Work Points by Saturday at 11:59 PM.    
+<span class=note>Over <span class=points style="padding-left:0px;">{50}</span> gets you {+1} Final Exam Point.</span>    
+
+
+## Reading Points <span class=headpoints>{22} Possible</span>
+
+### Section 10.1 <span class=rrecpoints>{4}</span><span class=report>{ A=4 | E=3 }</span>
+
+### Section 9.1 <span class=points>{4}</span><span class=report>{ A=0 | E=0 }</span>
+
+### Section 9.2 <span class=rrecpoints>{4}</span><span class=report>{ A=4 | E=2 }</span>
+
+### Section 9.3 <span class=rrecpoints>{6}</span><span class=report>{ A=6 | E=3 }</span>
+
+### Section 9.4 <span class=rrecpoints>{4}</span><span class=report>{ A=4 | E=2 }</span>
+
+
+## Theory Points <span class=headpoints>{11} Possible</span>
+
+### Theory 1 <span class=recpoints>{7}</span><span class=report>{ A=7 | E=7 }</span>
+
+The data in the `theory1` dataset was created from the two-lines model:
+
+$$
+  Y_i = \overbrace{3.5}^{\beta_0} + \overbrace{2.8}^{\beta_1} X_{i1}  \overbrace{-2.2}^{\beta_2} X_{i2} \overbrace{-3.5}^{\beta_3} X_{i1}X_{i2} + \epsilon_i \\ \text{where} \ \epsilon_i \sim N(0,\underbrace{1.5^2}_{\sigma^2})
+$$
+
+<span class=note>Be sure to review the two lines model from Hard Work 7 if you need a refresher on this model.</span>
+
+Notice the $X3$ variable in the `theory1` dataset. Notice further that $X3$ was not used in the creation of $Y$ in the regression model stated above. Thus, $X3$ should have no predictive ability with $Y$, but $X1$ and $X2$ will be useful in predicting $Y$ because they were both used in the model.
+
+```{r}
+X1 <- c(15, 2, 3.5, 7, 9, 11,  3, 5, 8, 3, 9, 14, 12, 10)
+X2 <- c( 1, 0,   1, 1, 0,  1,  0, 1, 1, 0, 0,  1,  0,  1)
+X3 <- c(15, 4, 8.1, 1, 8,  4, 14, 9, 9, 1, 2,  5, 12,  9)
+set.seed(212)
+Y <- 3.5 + 2.8*X1 - 2.2*X2 - 3.5*X1*X2 + rnorm(14, 0, 1.5)
+theory1 <- data.frame(Y=Y, X1=X1, X2=X2, X3=X3)
+datatable(theory1, options=list(lengthMenu=c(3,14)))
+
+
+```
+
+```{r}
+t1dat <- data.frame(Y=Y, X1=X1, X2=X2, X3=X3)
+pairs(t1dat, panel=panel.smooth)
+
+lm1 <- lm(Y+10 ~ X2, data =t1dat)
+summary(lm1)
+
+plot(lm1, which = 1)
+AIC(lm1)
+
+pairs(t1dat, panel = panel.smooth, col = as.factor(t1dat$X2))
+
+boxCox(lm1)
+lm2 <- lm(sqrt(Y+10) ~ X2, data = t1dat)
+AIC(lm2)
+plot(Y ~ X2, data = t1dat)
+abline(lm1)
+abline(lm1$coefficients[1]-10, lm1$coefficients[2])
+curve((lm2$coefficients[1] + lm2$coefficients[2]*x)^2 - 10, add = TRUE)
+
+pairs(cbind(Res = lm1$residuals, t1dat), panel = panel.smooth)
+
+lm2 <- lm(Y ~ X2 + X1, data = t1dat)
+summary(lm2)
+AIC(lm2)
+pairs(cbind(Res = lm2$residuals, t1dat), panel = panel.smooth, col = as.factor(t1dat$X2))
+
+lm3 <- lm(Y ~ X2 + X1 + X2:X1, data = t1dat)
+summary(lm3)
+
+
+
+
+
+
+```
+
+<br/>
+
+Pretend that you didn't know the model that was used to create $Y$ and that all you were given was the `theory1` dataset. The best place to begin searching for variables that could predict $Y$ would be with the code `pairs(theory1)` that produces the following scatterplot matrix.
+
+<span class="note">Note: See Section 9.2 for details about the scatterplot matrix.</span>
+
+```{r}
+pairs(theory1, pch=16, col="darkgray")
+```
+
+Looking at the scatterplot matrix above, the best looking picture is the graph across from $Y$ and above $X2$. This tells us that $X2$ is the strongest predictor of $Y$.
+
+----
+
+Create a single scatterplot showing $Y \sim X2$ and the fitted simple linear regression line. Discuss how close your "slope" coefficient for $X2$ in your simple linear regression model comes to the actual value of $\beta_2 = -2.2$ in the original regression model stated above.
+
+#### Answer 1:
+
+```{r}
+lm1 <- lm(Y ~ X2, data = theory1)
+summary(lm1)
+ 
+plot(lm1, which  = 1)
+```
+
+The slope is -26.454 with the model and the original slope is -2.2 so we know this is the wrong model. 
+
+Use the residuals from your regression in **Answer 1** to create two *added variable plots* (preferably side-by-side). The first should show the residuals against $X1$, `yourlm$res ~ X1`, and the second should show the residuals against $X3$, `yourlm$res ~ X3`. Which plot shows the strongest pattern? What does this mean? 
+
+<span class=note>Note: See Section 10.1 for details about added variable plots.</span>
+
+#### Answer 2:
+
+```{r}
+plot(lm1$residuals ~ X1, data = theory1)
+plot(lm1$residuals ~ X3, data = theory1)
+```
+
+X1 has the stongest pattern to fit with the model. This means that there might be an interaction that we should be doing a two-line model. 
+
+
+Perform another regression where you add $X1$ to the model, `Y ~ X2 + X1`. Show a scatterplot of $Y \sim X1$ with the dots colored according to $X2$, `col=as.factor(X2)`. Add the fitted regression lines to the plot. Does this regression look like an improvement? What is the adjusted R-squared value? How does the adjusted R-squared value compare to the simple linear regression from **Answer 1**?
+
+<span class=note>Note: See Section 9.3 for details about the adjusted R-squared value.</span>
+
+#### Answer 3:
+
+```{r}
+lm3 <- lm(Y ~ X2 + X1, data = theory1)
+
+pairs(cbind(Res = lm2$residuals, theory1), panel = panel.smooth, col = as.factor(theory1$X2))
+summary(lm3)
+```
+
+The adjusted R-Squared value is  0.8066 it is a bit bigger then the simple linear regression. This regression looks like a bit of an improvement but it isn't getting the best values and there is more insight to see. 
+
+
+
+Produce an added variable plot showing the residuals from the regression in **Answer 3** against the interaction of $X1$ and $X2$, `yourlm2$res ~ I(X1*X2)`. How strong of a pattern does this plot show? Is there evidence that the interaction term should be added to the regression model? (Remember, it was there in the original model.)
+
+#### Answer 4:
+
+```{r}
+lm3 <- lm(Y ~ X2 + X1 + X2:X1, data = theory1)
+summary(lm3)
+plot(lm3)
+```
+
+----
+
+
+Finally, add the interaction term to your regression, `Y ~ X2 + X1 + X2:X1`. Draw another scatterplot of $Y \sim X1$ with the dots colored according to $X2$. Add the fitted regression model to the plot along with the original true model. How well did the final model do at uncovering the original model? What is the adjusted R-squared value of the final model?
+
+#### Answer 5:
+
+```{r}
+three_lm <- lm(Y~ X2 + X1 + X2:X1, data = theory1)
+b <- three_lm$coefficients
+plot(Y ~ X2, pch=16, col=as.factor(X1))
+#abline(three_lm)
+curve(b[1] + b[2]*x, add=TRUE, col= "red", lty=2)
+curve((b[1] + b[3]) + (b[2]+b[4])*x, add = TRUE, col = "blue", lty = 2)
+
+```
+
+----
+
+
+Summarize the process that was used in the previous answers (1-5) to determine that the two-lines model with the interaction term was the best model for this data.
+
+#### Answer 6:
+
+I started out with the simplest model and that just didn't fit the data well. Going through the pairs plots there was a pattern in the plots with adding X1 to the model. After coloring the X1 in the pairs plots I could see there was an interaction and that the lines were straight instead of curving like a quadratic model. This led me to believe that the two-lines model would best fit this data. 
+
+
+
+
+
+
+
+### Theory 2 <span class=recpoints>{4}</span><span class=report>{ A=4 | E=4 }</span>
+
+In the **Theory 1** problem, you were asked to find the adjusted R-squared value for each model that you fit to the data. There are actually many ways to measure how well a regression model fits the data. The three most popular measurements are the adjusted R-squared, the AIC, and the BIC (sometimes called the SBC).
+
+<span class=note>Note: See Section 9.3 for details about each of these ways of measuring how well a given model fits the data.</span>
+
+Suppose data came from the following quadratic model.
+
+$$
+  Y_i = \overbrace{3.5}^{\beta_0} + \overbrace{-18}^{\beta_1} X_i + \overbrace{2.5}^{\beta_2} X_i^2 + \epsilon_i \\
+  \text{where} \ \epsilon_i \sim N(0, \underbrace{15.8}_{\sigma^2})
+$$
+
+So that it looks like the scatterplot in **Answer 1**.
+
+Fit each of the following models to the data, and draw the fitted models on the plot below. Include a legend stating which model is which. 
+
+* Simple Linear Regression Model
+* Two-lines Model
+* Quadratic Model
+* Double Quadratic Model
+
+#### Answer 1:
+
+```{r}
+set.seed(121)
+X1 <- runif(30, 0, 15)
+X2 <- sample(c(0,1), 30, replace=TRUE)
+Y <- 3.5 + -18*X1 + 2.5*X1^2 + rnorm(30, 0, 15.8)
+
+#par(mfrow = c(2,2))
+
+plot(Y ~ X1)
+
+## Add your code here:
+plot(Y ~ X1)
+model <- lm(Y ~ X1)
+abline(model)
+
+plot(Y ~ X1)
+two_line <- lm(Y ~ X1 + X2 + X1:X2)
+b <- two_line$coefficients
+curve(b[1] + b[2]*x, add = TRUE, col = "red")
+curve((b[1] + b[3]) + (b[2]+ b[4])*x, add = TRUE, col = "blue")
+
+
+plot(Y~X1)
+quad_lm <- lm(Y ~ X1 + I(X1^2))
+c <- quad_lm$coefficients
+curve(c[1]+c[2]*x +c[3]*x^2, add = TRUE, col = "blue")
+
+
+plot(Y~X1)
+model_lm <- lm(Y ~ X1 + I(X1^2) + X2 + X1:X2 + I(X1^2):X2)
+b <- model_lm$coefficients
+curve(b[1] + b[2] *x + b[3]*x^2, add = TRUE, col = "blue")
+curve(b[1] + b[4] + b[2]*x + (b[3]+ b[5])*x^2, add = TRUE, col = "red")
+
+```
+
+----
+
+
+Compute the adjusted R-squared, AIC, and BIC for each of the models in **Answer 1**. Which model is selected as the best model by each criterion? Did the criterions all select the correct model as the best model?
+
+#### Answer 2:
+
+```{r}
+# Hint: run ?AIC in your Console
+
+summary(quad_lm)
+AIC(quad_lm)
+```
+
+The quadratic model fit the best. 
+
+
+Write a few notes to yourself about how to use model selection criterion to decide which model best fits data.
+
+#### Answer 3:
+
+
+You start with the simplest model and then if it doesn't fit you start to get more complex. The higher adjusted square and the lower the AIC is the best fit model. 
+
+
+
+
+## Application Points <span class=headpoints>{20} Possible</span>
+
+
+### Application 1 <span class=recpoints>{7}</span><span class=report>{ A=7 | E=7 }</span> 
+
+Study the help file `?mtcars` to learn about the `mtcars` dataset and what each column of the data represents. Then, use the `mtcars` dataset to come up with a best regression model for predicting the miles per gallon `mpg` of a vehicle.
+
+#### Answer 1:
+
+```{r}
+pairs(mtcars)
+```
+
+----
+
+
+Draw your "best" regression model.
+
+#### Answer 2:
+
+```{r}
+plot(mpg~wt, data = mtcars, col = as.factor(vs))
+model_lm <- lm(mpg ~ wt + I(wt^2) + vs + wt:vs + I(wt^2):vs, data = mtcars)
+b <- model_lm$coefficients
+curve(b[1] + b[2] *x + b[3]*x^2, add = TRUE, col = "blue")
+curve(b[1] + b[3] + (b[2] + b[4]*x) + (b[3]+ b[5])*x^2, add = TRUE, col = "red")
+summary(model)
+```
+
+----
+
+
+Summarize your approach to finding this "best" model.
+
+#### Answer 3:
+
+
+Went through the pairs and found that weight was a great fit and also the shape of the engine. This makes for a pretty high adjusted r squred as .778
+
+
+
+### Application 2 <span class=recpoints>{7}</span><span class=report>{ A=7 | E=7 }</span> 
+
+Study the help file for the `RailTrail` dataset in R using `?RailTrail` to learn what each column of the dataset represents. Then, come up with a "best" regression model for predicting the daily `volume` of users on the trail.
+
+
+#### Answer 1:
+
+```{r}
+RailTrail$dayType <- as.factor(RailTrail$dayType)
+
+pairs(RailTrail)
+
+model <- lm(volume ~ hightemp + I(hightemp^2)+ weekday + hightemp:weekday + I(hightemp^2):weekday, data = RailTrail)
+summary(model)
+
+plot(volume ~ hightemp, col = as.factor(weekday),data = RailTrail)
+
+b <- model$coefficients
+curve(b[1] + b[2]*x + b[3]*x^2, add = TRUE, col = "blue")
+curve(b[1] + b[4] + (b[2] + b[5]*x) + (b[3]+ b[6])*x^2, add = TRUE, col = "red")
+
+
+```
+
+----
+
+
+Draw your "best" regression model.
+
+#### Answer 2:
+
+```{r}
+plot(volume ~ hightemp, col = as.factor(weekday),data = RailTrail)
+
+b <- model$coefficients
+curve(b[1] + b[2]*x + b[3]*x^2, add = TRUE, col = "blue")
+curve(b[1] + b[4] + (b[2] + b[5]*x) + (b[3]+ b[6])*x^2, add = TRUE, col = "red")
+```
+
+can't get my second line to apear
+
+
+Summarize your approach to finding this "best" model.
+
+#### Answer 3:
+
+
+went through pairs plot and then just tried to look at adjusted r squared and this one was decent but not the best. I think it is in more of a 3 demenisional space. 
+
+
+
+### Application 3 <span class=points>{6}</span><span class=report>{ A=0 | E=0 }</span> 
+
+Study the help file for the `airquality` dataset in R using `?airquality` to learn what each column of the dataset represents. Then, come up with a "best" regression model for predicting the daily average `Wind` speed.
+
+#### Answer 1:
+
+```{r}
+
+```
+
+----
+
+
+Draw your "best" regression model.
+
+#### Answer 2:
+
+```{r}
+
+```
+
+----
+
+
+Summarize your approach to finding this "best" model.
+
+#### Answer 3:
+
+
+----
+
+
+
+
+
+<style>
+.points {
+  font-size:.8em;
+  padding-left:5px;
+  font-weight:bold; 
+  color:#317eac;
+}
+
+.recpoints {
+  font-size:.8em;
+  padding-left:5px;
+  font-weight:bold; 
+  color:#7eac31;
+}
+
+.rrecpoints {
+  font-size:1em;
+  padding-left:5px;
+  font-weight:bold; 
+  color:#7eac31;
+}
+
+.report {
+  font-size:.7em;
+  padding-left:15px;
+  font-weight:normal; 
+  color:#5a5a5a;
+}
+
+.datalink {
+  font-size:.5em;
+  color:#317eac;
+  padding-left:5px;
+}
+
+.headnote {
+  font-size:.6em;
+  color:#787878;
+}
+
+.note {
+  font-size:.8em;
+  color:#787878;
+}
+
+.headpoints {
+ font-size:12pt;
+ color: #585858; 
+ padding-left: 15px;
+}
+</style>
+
+
+
+<footer>
+</footer>
+
+
+
+ 
+
+ 
+
+ 
+
+ 

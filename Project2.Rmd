@@ -1,0 +1,357 @@
+---
+title: "Project 2 -- Regression Battleship"
+author: "Matt Hirschi"
+output: 
+  html_document:
+    code_folding: hide
+    theme: cerulean
+    toc: yes
+    toc_float: yes
+---
+
+## Step 1. Creating your Data
+
+There are only three general rules that you must follow in the creation of your dataset.
+
+1. Your dataset must have one "Y" variable and 20 "X" variables labeled as "Y", "X1", ..., "X20". 
+
+2. Your response variable $Y$ must come from a linear regression model that satisfies:    
+$$
+  Y_i^\prime = \beta_0 + \beta_1 X_{i1}^\prime + \ldots + \beta_{p-1}X_{i,p-1}^\prime + \epsilon_i  
+$$
+where $\epsilon_i \sim N(0,\sigma^2)$ and $p\leq 21$.
+
+3. All $X$-variables that were used to create $Y$ are contained in your dataset. However, the $X'$ variables are not needed.
+
+```{r, eval=FALSE}
+set.seed(121) #This ensures your randomness is the "same" everytime. You are free to change the 121 to any natural number.
+
+## To begin, decide on your sample size:
+  
+ n <- 40
+  
+## Then, create 20 X-variables.
+
+ # For example, you could create quantitative variables by:
+ 
+ X1 <- runif(n, 5, 30) 
+ hist(X1)
+ #You could also use:
+ # rnorm(n, 5, 30), rt(n, 6), rchisq(n, 7), rf(n, 2, 5), and so on.
+ 
+ # Or you could create qualitative variables by:
+ X2 <- sample(c(1,0), n, replace=TRUE)
+ barplot(table(X2))
+ # You could also use:
+ # rep(c(1,0), length.out=n), sample(c(1,2,3), n, replace=TRUE), and so on.
+
+ # Replace all NA's with length n vectors of either quantitative
+ # or qualitative data.
+ X3 <- runif(n, 5, 30)
+ X4 <- sample(c(1,0), n, replace=TRUE)
+ X5 <- runif(n, 5, 30)
+ X6 <- runif(n, 5, 30)
+ X7 <- runif(n, 5, 30)
+ X8 <- runif(n, 5, 30)
+ X9 <- runif(n, 5, 30)
+ X10 <- runif(n, 5, 30)
+ X11 <- runif(n, 5, 30)
+ X12 <- runif(n, 5, 30)
+ X13 <- runif(n, 5, 30)
+ X14 <- runif(n, 5, 30)
+ X15 <- runif(n, 5, 30)
+ X16 <- runif(n, 5, 30)
+ X17 <- sample(c(1,0), n, replace=TRUE)
+ X18 <- sample(c(1,0), n, replace=TRUE)
+ X19 <- sample(c(1,0), n, replace=TRUE)
+ X20 <- runif(n, 5, 30)
+ 
+ 
+## Then, decide on your model:
+ # For example,
+ # Y = Y ~ X1 + X17 + X1:X17
+ 
+ # Create betas for your model and choose sigma for your errors
+ beta0 <- 6
+ beta1 <- 4
+ beta2 <- 30
+ 
+ sigma <- 4.5
+   
+ ################################
+ # You CANNOT change this part:
+ errors <- rnorm(n, 0, sigma)
+ ################################ 
+ 
+ # You can use Y' instead of Y, or X' instead of X
+ # but you cannot directly transform the errors or the betas.
+ # For example, the following are legal transformations:
+ 
+ X1p <- sqrt(X1) #Transform an X-variable prior to creating Y
+ 
+ #Create Y according to your model
+ Y <- beta0 + beta1*X1 + beta2*X2 + errors 
+ 
+ Yp <- sqrt(Y) #Transform the Y-variable after creating Y
+ 
+ yourData <- data.frame(Y=Y, #or Yp, you can decide which to give.
+                        X1=X1, # Cannot be changed.
+                        X2=X2, # Cannot be changed.
+                        X3=X3, # Cannot be changed.
+                        X4=X4, # Cannot be changed.
+                        X5=X5, # Cannot be changed.
+                        X6=X6, # Cannot be changed.
+                        X7=X7, # Cannot be changed.
+                        X8=X8, # Cannot be changed.
+                        X9=X9, # Cannot be changed.
+                        X10=X10, # Cannot be changed.
+                        X11=X11, # Cannot be changed.
+                        X12=X12, # Cannot be changed.
+                        X13=X13, # Cannot be changed.
+                        X14=X14, # Cannot be changed.
+                        X15=X15, # Cannot be changed.
+                        X16=X16, # Cannot be changed.
+                        X17=X17, # Cannot be changed.
+                        X18=X18, # Cannot be changed.
+                        X19=X19, # Cannot be changed.
+                        X20=X20) # Cannot be changed.
+if (!"yData.csv" %in% dir()){
+  write.csv(yourData, "yData.csv", row.names=FALSE)
+} else{
+  cat("yData.csv already exists. File not re-saved.")
+}
+# The above code writes the dataset to your "current directory"
+# To see where that is, use: getwd() in your Console.
+```
+
+
+
+## Step 2. Analyzing Brother Saunders's Data
+
+Brother Saunders followed the same 3 rules that were outlined above in the creation of his data. You need to analyze his data to try to make a guess at his true regression model. Document your approach as best you can as you search for his model. Stat your final guess in the area provided.
+
+```{r}
+sdata <- read.csv("Sdata.csv", header=TRUE)
+pairs(sdata)
+model <- lm(Y ~ X9, data = sdata)
+summary(model)
+pairs(cbind(res = model$residuals, data = sdata), panel = panel.smooth)
+model2 <- lm(Y~X9 + I(X9^2) + X11 + X9:X11 + I(X9^2):X11, data = sdata)
+summary(model2)
+
+```
+
+
+
+### Your Final Guess at Brother Saunders's Model
+
+Your final guess:
+
+
+<!-- Enter your model in the math notation below. -->
+
+$$
+  Y_i = \beta_0 + \beta_1X9 + \beta_2X9^2 + \beta_3X11 + \beta_4X9*X11 + \beta_5X9^2*X11 \epsilon_i
+$$
+
+<!-- Only enter your model in the statement above and in the "Edit this part" shown below. -->
+
+with your 95% confidence interval estimates of the coefficients as follows.
+
+```{r,eval=FALSE}
+if (exists("sdata")){
+## EDIT THIS PART #################################################
+## Input your lm(Y ~ ... ,data=sdata)
+final.lm <- lm(Y ~ 1, data=sdata) #replace the "1" with your model
+###################################################################
+
+## This will create nice output for you.
+## Don't edit this code.
+mytable <- round(confint(final.lm, level=0.95), 2)
+betas <- paste0("$\\beta_", 0:(length(final.lm$coefficients)-1), "$")
+rownames(mytable) <- betas
+colnames(mytable) <- c("Lower", "Upper")
+pander(mytable)
+}
+```
+
+
+
+
+
+
+## Step 3. Final Synthesis
+
+This will be completed after Brother Saunders returns to you his guess at your true model. Document the approach Brother Saunders used to uncover your true regression model. State what things worked well and what things did not. How well did he recover your true regression model? Did he recover a mathematically equivalent version of your regression model?
+
+I started with the pairs plot. After looking at this my eyes led me to believe that X9 was a great place to start looking at for the regression model. I then put a model with just using Y on X9 and it gave a pretty good adjusted R-Squared value at .88. But I knew there was a better model. I then looked at the residuals pairs plot off of the model. I looked at this and determined that X11 had a strong interaction with X9. I then determined that a double quadratic regression model would fit this well and it did with .93 Adjusted R-Squared value. And that is as far as I got. 
+
+Use the ideas from Section 9.6 to compare how well Brother Saunders's model compares to your true model for the given dataset.
+
+```{r, eval = TRUE}
+set.seed(122) #This ensures your randomness is the "same" everytime. You are free to change the 121 to any natural number.
+
+## To begin, decide on your sample size:
+  
+ n <- 40
+  
+## Then, create 20 X-variables.
+
+ # For example, you could create quantitative variables by:
+ 
+ X1 <- runif(n, 5, 30) 
+ hist(X1)
+ #You could also use:
+ # rnorm(n, 5, 30), rt(n, 6), rchisq(n, 7), rf(n, 2, 5), and so on.
+ 
+ # Or you could create qualitative variables by:
+ X2 <- sample(c(1,0), n, replace=TRUE)
+ barplot(table(X2))
+ # You could also use:
+ # rep(c(1,0), length.out=n), sample(c(1,2,3), n, replace=TRUE), and so on.
+
+ # Replace all NA's with length n vectors of either quantitative
+ # or qualitative data.
+ X3 <- runif(n, 5, 30)
+ X4 <- sample(c(1,0), n, replace=TRUE)
+ X5 <- runif(n, 5, 30)
+ X6 <- runif(n, 5, 30)
+ X7 <- runif(n, 5, 30)
+ X8 <- runif(n, 5, 30)
+ X9 <- runif(n, 5, 30)
+ X10 <- runif(n, 5, 30)
+ X11 <- runif(n, 5, 30)
+ X12 <- runif(n, 5, 30)
+ X13 <- runif(n, 5, 30)
+ X14 <- runif(n, 5, 30)
+ X15 <- runif(n, 5, 30)
+ X16 <- runif(n, 5, 30)
+ X17 <- sample(c(1,0), n, replace=TRUE)
+ X18 <- sample(c(1,0), n, replace=TRUE)
+ X19 <- sample(c(1,0), n, replace=TRUE)
+ X20 <- runif(n, 5, 30)
+ 
+ 
+## Then, decide on your model:
+ # For example,
+ # Y = Y ~ X1 + X17 + X1:X17
+ 
+ # Create betas for your model and choose sigma for your errors
+ beta0 <- 6
+ beta1 <- 4
+ beta2 <- 30
+ 
+ sigma <- 4.5
+   
+ ################################
+ # You CANNOT change this part:
+ errors <- rnorm(n, 0, sigma)
+ ################################ 
+ 
+ # You can use Y' instead of Y, or X' instead of X
+ # but you cannot directly transform the errors or the betas.
+ # For example, the following are legal transformations:
+ 
+ X1p <- sqrt(X1) #Transform an X-variable prior to creating Y
+ 
+ #Create Y according to your model
+ Y <- beta0 + beta1*X1 + beta2*X2 + errors 
+ 
+ Yp <- sqrt(Y) #Transform the Y-variable after creating Y
+ 
+ yourData2 <- data.frame(Y=Y, #or Yp, you can decide which to give.
+                        X1=X1, # Cannot be changed.
+                        X2=X2, # Cannot be changed.
+                        X3=X3, # Cannot be changed.
+                        X4=X4, # Cannot be changed.
+                        X5=X5, # Cannot be changed.
+                        X6=X6, # Cannot be changed.
+                        X7=X7, # Cannot be changed.
+                        X8=X8, # Cannot be changed.
+                        X9=X9, # Cannot be changed.
+                        X10=X10, # Cannot be changed.
+                        X11=X11, # Cannot be changed.
+                        X12=X12, # Cannot be changed.
+                        X13=X13, # Cannot be changed.
+                        X14=X14, # Cannot be changed.
+                        X15=X15, # Cannot be changed.
+                        X16=X16, # Cannot be changed.
+                        X17=X17, # Cannot be changed.
+                        X18=X18, # Cannot be changed.
+                        X19=X19, # Cannot be changed.
+                        X20=X20) # Cannot be changed.
+ 
+ 
+plot(Y ~ X1, data = yourData2)
+model <- lm(Y ~ X1 + X2 + X1:X2, data = yourData2)
+b <- model$coefficients
+curve(b[1] + b[2]*x, add = TRUE, col = "blue")
+curve(b[1]+ b[3] + b[2]+b[4]*x, add = TRUE, col = "red")
+m1 <- lm(Y ~ X1 + X2 + X1:X2, data=yourData2)
+c <- m1$coefficients
+curve(c[1] + c[2]*x, add = TRUE, col = "green")
+curve(c[1]+ c[3] + c[2]+c[4]*x, add = TRUE, col = "black")
+
+summary(model)
+summary(m1)
+```
+
+
+
+
+
+
+
+
+
+<style>
+#points {
+  font-size:.8em;
+  padding-left:5px;
+  font-weight:bold; 
+  color:#317eac;
+}
+
+#recpoints {
+  font-size:.8em;
+  padding-left:5px;
+  font-weight:bold; 
+  color:#7eac31;
+}
+
+#datalink {
+  font-size:.5em;
+  color:#317eac;
+  padding-left:5px;
+}
+
+#headnote {
+  font-size:.6em;
+  color:#787878;
+}
+
+#note {
+  font-size:.8em;
+  color:#787878;
+}
+
+#headpoints {
+ font-size:12pt;
+ color: #585858; 
+ padding-left: 15px;
+}
+</style>
+
+
+<footer>
+</footer>
+
+
+
+ 
+
+ 
+
+ 
+
+ 

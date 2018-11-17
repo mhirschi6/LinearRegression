@@ -289,3 +289,54 @@ b <- coef(lob_lm2)
 curve(b[1]+b[2]*x+b[3]*x^2+b[4]^3, add = TRUE, col="red")
 summary(lob_lm2)
 cor(Loblolly$age-mean(Loblolly$age), (Loblolly$age-mean(Loblolly$age))^2)
+
+
+
+
+pairs(Utilities)
+ggpairs(Utilities)
+u2 <- Utilities
+colnames(u2)
+colnames(u2) <- c("X1","X2","X3","X4","X5","X6","X7","X8","X9","X9","X10","X11","X12")
+
+par(mfrow=c(1,2))
+plot(totalbill ~ gasbill, data = Utilities)
+plot(totalbill ~ temp, data = Utilities)
+u_gas <- lm(totalbill ~ gasbill, data = Utilities)
+summary(u_gas)
+
+#golf rules, lowest the best
+AIC(u_gas)
+
+X1 <- runif(117, 4, 28)
+X2 <- runif(117, 55, 120)
+X3 <- runif(117, 1, 12)
+
+Y <- 16 + 7*X2 - 13*X2^2 + rnorm(117, 0, 1.2)
+mydata <- data.frame(Y = Y,
+                     X1 = X1,
+                     X2 = X2,
+                     X3 = X3)
+pairs(mydata)
+
+lm1 <- lm(Y ~ X1, data = mydata)
+lm2 <- lm(Y~X3, data = mydata)
+lm3 <- lm(Y~X2, data = mydata)
+summary(lm1)
+summary(lm2)
+summary(lm3)
+AIC(lm1)
+AIC(lm2)
+AIC(lm3)
+lm4 <- lm(Y ~ X2 + I(X2^2), data = mydata)
+summary(lm4)
+lm1 <- totalbill ~ month + I(month^2), data = Utilities)
+plot(lm1$residuals ~ year, data = Utilities)
+lm2 <- lm(totalbill ~ month + I(month^2) + year, data = Utilities)
+summary(lm2)
+
+
+added variable plots
+if the Xnew and Residuals plot has a nice pattern we will add Xnew to our model
+
+
