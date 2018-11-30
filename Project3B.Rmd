@@ -1,0 +1,132 @@
+---
+title: "Project 3 -- Predicting Math 325 Final Exam Scores"
+author: "Matt Hirschi"
+output: 
+  html_document:
+    theme: cerulean
+    toc: true
+    toc_float: true
+    code_folding: hide
+editor_options: 
+  chunk_output_type: console
+---
+
+
+## Overview
+
+The goal of this project is to come up with a model that accurately predicts final exam scores in Math 325.
+
+The earlier in the semester that your model can be applied, the more useful it becomes. The goal of the prediction is two-fold. First, it gives the students in the course an accurate prediction of how well they are doing knowledge-wise in the course. Second, it allows the teacher a way to identify students that are struggling early on in hopes of helping them improve their final performance.
+
+## Step 1. Find your Data
+
+Use the `Math325` dataset that is provided (in I-Learn) for this project.
+
+```{r}
+library(tidyverse)
+library(mosaic)
+library(car)
+library(janitor)
+dat <- read_csv("Math325.csv")
+```
+
+
+## Step 2. Model the Data
+
+Use good model selection strategies to develop a "best" model for predicting the data. Defend your choice of the model with supporting p-values, supporting information criterion (like $R^2_a$, $AIC$, or $BIC$), and useful graphics (like scatterplots, added variable plots and diagnostic plots).
+
+```{r}
+dat1 <- dat %>% 
+  select(FinalExam, SkillsQuizW1, SkillsQuizW2, SkillsQuizW3,SkillsQuizW4, SkillsQuizW5, SkillsQuizW6,Project1, Analysis1, Analysis2) %>% 
+  mutate(Total = SkillsQuizW1 + SkillsQuizW2 + SkillsQuizW3 + SkillsQuizW4 + SkillsQuizW5 + SkillsQuizW6) %>% 
+  mutate(Total_1 = Analysis1 + Analysis2)
+
+pairs(dat1, panel = panel.smooth)
+
+#best model I found
+model <- lm(FinalExam ~ Total +  I(Total) + Analysis2 + Total:Analysis2 + I(Total^2):Analysis2, data = dat1)
+summary(model)
+
+model1 <- lm(FinalExam ~ Total + Analysis2 + Total:Analysis2, data = dat1)
+summary(model1)
+
+model2 <- lm(FinalExam ~ SkillsQuizW1 + I(SkillsQuizW1^2) + Analysis2 + SkillsQuizW1:Analysis2 + I(SkillsQuizW1^2):Analysis2, data = dat1)
+summary(model2)
+model3 <- lm(FinalExam ~ Total +  I(Total^2) + Total_1 + Total:Total_1 + I(Total^2):Total_1, data = dat1)
+summary(model)
+
+plot(model3, which = 1:2)
+qqPlot(model)
+```
+
+## Step 3. Describe your Strategy
+
+Interpret your regression model and describe it in a way that is simple and intuiative. 
+
+
+## Grading
+
+You will be graded on two things.
+
+1. How well you apply the regression principles we have learned thus far this semester. (Think Projects 1 and 2.) 
+
+2. How well you interpret your results and describe your "buying and selling" strategy.
+
+
+
+
+
+
+
+
+<style>
+#points {
+  font-size:.8em;
+  padding-left:5px;
+  font-weight:bold; 
+  color:#317eac;
+}
+
+#recpoints {
+  font-size:.8em;
+  padding-left:5px;
+  font-weight:bold; 
+  color:#7eac31;
+}
+
+#datalink {
+  font-size:.5em;
+  color:#317eac;
+  padding-left:5px;
+}
+
+#headnote {
+  font-size:.6em;
+  color:#787878;
+}
+
+#note {
+  font-size:.8em;
+  color:#787878;
+}
+
+#headpoints {
+ font-size:12pt;
+ color: #585858; 
+ padding-left: 15px;
+}
+</style>
+
+
+<footer>
+</footer>
+
+
+
+ 
+
+ 
+
+ 
+
+ 

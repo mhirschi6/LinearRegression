@@ -340,3 +340,59 @@ added variable plots
 if the Xnew and Residuals plot has a nice pattern we will add Xnew to our model
 
 
+plot(dist ~ speed, data = cars)
+lm1 <- lm(dist ~ speed, data = cars)
+abline(lm1)
+
+cars %>% 
+  ggplot(aes(x = speed, y = dist))+
+  geom_point()+
+  geom_smooth(method = "lm")+
+  geom_smooth(method = "loess", se = FALSE)
+
+lm2 <- lm(dist ~ speed + I(speed^2), data = cars)
+b <- lm2$coefficients
+
+cars %>% 
+  ggplot(aes(x = speed, y = dist))+
+  geom_point()+
+  geom_smooth(method = "lm")+
+  geom_smooth(method = "loess", se = FALSE)+
+  stat_function(fun = function(x) b[1] + b[2]*x + b[3]*x^2)
+
+#rlm is in MASS
+lm3 <- rlm(dist ~ speed, data = cars)
+plot(dist ~ speed, data = cars)
+abline(lm1)
+abline(lm3, col = "red")
+
+
+# robust quadratic don't listen to outliers listen to the main set of data
+
+lm4 <- rlm(dist ~ speed + I(speed^2), data = cars)
+b2 <- lm4$coefficients
+cars %>% 
+  ggplot(aes(x = speed, y = dist))+
+  geom_point()+
+  stat_function(fun = function(x) b[1] + b[2]*x + b[3]*x^2)+
+  stat_function(fun = function(x) b2[1] + b2[2]*x + b2[3]*x^2,
+                color = "red")
+
+
+#regression trees
+#library(mosiac)
+plot(births ~ dayofyear, data = Births78)
+
+b78 <- Births78
+b78$wend <- as.factor(ifelse(b78$wday %in% c("Sat", "Sun"), "Weekend", 
+                             "Weekday"))
+
+tree <- ctree(births ~ dayofyear + wend, data = b78)
+plot(tree)
+mymeanswend <- mean(births ~ wend, data = subset(b78, wend == "Weekend" & dayofyear <= 185))
+
+
+
+
+
+abline(h = mymeans, col = c("skyblue", "firebrick"))
