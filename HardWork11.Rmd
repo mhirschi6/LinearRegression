@@ -1,0 +1,299 @@
+---
+title: "Hard Work 11"
+output: 
+  html_document:
+    theme: cerulean
+    toc: true
+    toc_float: true
+    code_folding: hide
+editor_options: 
+  chunk_output_type: console
+---
+
+<style>
+
+</style>
+
+## Instructions
+
+1. Study Sections 11.4 (first) and then 11.3 -- "Regression Trees and Robust Regression."
+
+2. Attempt and submit at least <span class=points style="padding-left:0px;">{44}</span> Hard Work Points by Saturday at 11:59 PM.    
+<span class=note>Over <span class=points style="padding-left:0px;">{47}</span> gets you {+1} Final Exam Point.</span>    
+
+
+## Reading Points <span class=headpoints>{19} Possible</span>
+
+### Section 11.4 <span class=rrecpoints>{7}</span><span class=report>{ A=7 | E=4 }</span>
+
+
+### Section 11.3 <span class=rrecpoints>{12}</span><span class=report>{ A=12 | E=9 }</span>
+
+
+
+
+## Theory Points <span class=headpoints>{4} Possible</span>
+
+### Problem 11.2 <span class=points>{2}</span><span class=report>{ A=2 | E=2 }</span>
+
+When you run robust regression it weights outliers less then the data that is effecting the line the most. This way you don't have to exclude outliers but they don't play a huge weight into your regression model. 
+
+ 
+### Problem 11.4 <span class=points>{2}</span><span class=report>{ A=2 | E=2 }</span>
+
+You will have to many nodes when you have a small sample with to many predictors. This will cause small chunks of data to have their own mean but it won't be worth anything because the sample size of the sample size will be very small. 
+
+## Application Points <span class=headpoints>{25} Possible</span>
+
+
+<a class=datalink style="font-size:.9em;" target="_blank" href=http://www.stat.ufl.edu/~rrandles/sta4210/Rclassnotes/data/textdatasets/index.html>Data Files</a>
+
+### Problem CO2 <span class=recpoints>{10}</span><span class=report>{ A=10 | E=10 }</span>
+
+Create a graphic similar to Figure 11.9 of the textbook for the CO2 data. 
+Interpret your graphic.
+
+```{r, message=FALSE, warning=FALSE}
+# Install the party library
+# Run once: install.packages("party")
+library(party)
+library(MASS)
+library(tidyverse)
+library(mosaic)
+library(car)
+```
+
+## Application 1
+```{r, eval=FALSE}
+# Set eval=TRUE to run this code.
+ctree <- ctree(uptake ~ conc + Treatment + Type, data=CO2)
+plot(ctree, type="simple")
+unique(predict(ctree))
+# Hint
+
+```
+```{r}
+palette(c("#FBB4AE", "#B3CDE3", "#CCEBC5", "#DECBE4"))
+plot(uptake ~ conc, data=CO2, col=interaction(Type,Treatment), pch=16)
+lines(c(0, 174), c(20.575,20.575), lwd=3, col="#DECBE4")
+lines(c(175,499), c(37.383,37.383), lwd = 3, col = "#FBB4AE")
+lines(c(500,1000), c(40.750,40.750), lwd = 3, col = "#B3CDE3")
+lines(c(0,249), c(19.67778,19.67778), lwd = 3, col = "#CCEBC5")
+lines(c(250,1000), c(30.65833,30.65833), lwd = 3, col = "#DECBE4")
+lines(c(0,249), c(13.48889,13.48889), lwd = 3, col = "#FBB4AE")
+lines(c(250,1000), c(17.55833,17.55833), lwd = 3, col = "#B3CDE3")
+```
+
+
+### Problem 11.11 <span class=recpoints>{7}</span><span class=report>{ A=7 | E=7 }</span> 
+##Application 2
+```{r}
+# Code to read in the data
+# It has to be merged from the 1.20 and 8.15 data files.
+p11.11 <- read.table("http://www.stat.ufl.edu/~rrandles/sta4210/Rclassnotes/data/textdatasets/KutnerData/Chapter%2011%20Data%20Sets/CH11PR11.txt", header=FALSE)
+
+p1.20 <- read.table("http://www.stat.ufl.edu/~rrandles/sta4210/Rclassnotes/data/textdatasets/KutnerData/Chapter%20%201%20Data%20Sets/CH01PR20.txt", header=FALSE)
+
+p11.11 <- rbind(p1.20, p11.11)
+
+# Give it nice column names for conevience:
+colnames(p11.11) <- c("Y","X1")
+colnames(p1.20) <- c("Y", "X1")
+
+# Show the data:
+# p11.11
+```
+
+#A
+```{r}
+plot(Y ~ X1, data = p11.11)
+model <- lm(Y ~ X1, data = p11.11)
+abline(model)
+summary(model)
+
+plot(Y ~ X1, data = p1.20)
+model <- lm(Y ~ X1, data = p1.20)
+abline(model)
+summary(model)
+```
+
+ 
+Y = 1.8860 + 15.1094 * x
+Y = -0.5802 + 15.0352 * x
+
+#B
+```{r}
+lm1 <- lm(Y ~ X1, data = p11.11)
+MAD <- 1/0.6745 * median(abs(lm1$res - median(lm1$res)))
+ui <- lm1$res/MAD
+
+#Huber:
+w <- ifelse(abs(ui) <= 1.345, 1, 1.345/abs(ui))
+
+lm2 <- lm(Y ~ X1, data = p11.11, weights=w)
+MAD <- 1/0.6745*median(abs(lm2$res - median(lm2$res)))
+ui <- lm2$res/MAD
+
+#Huber: 
+w2 <- ifelse(abs(ui) <= 1.345, 1, 1.345/abs(ui))
+
+lm3 <- lm(Y ~ X1, data = p11.11, weights = w2)
+MAD <- 1/0.6745*median(abs(lm3$res - median(lm3$res)))
+ui <- lm3$res/MAD
+
+w3 <- ifelse(abs(ui) <= 1.345, 1, 1.345/abs(ui))
+
+lm4 <- lm(Y ~ X1, data = p11.11, weights = w3)
+
+
+```
+Smallest is case 47 at 0.1301640
+Case 46 is 0.2921668
+
+#C
+Y = -0.9235 + 13.552 * x
+
+
+
+#D
+Smallest case 46 .12629, case 46 is .27858
+Y = -1.5347 + 15.4247 * x
+Y = -1.6778 + 15.4436 * x
+
+
+
+
+#E
+```{r}
+lm5 <- rlm(Y ~ X1, data = p11.11)
+plot(Y ~ X1, data = p11.11)
+abline(lm4)
+abline(lm5, col = "red")
+
+```
+
+
+
+
+### Problem 11.12 <span class=recpoints>{8}</span><span class=report>{ A=8 | E=8 }</span> 
+## Application 3
+```{r}
+# Code to read in the data
+# It has to be merged from the 1.20 and 8.15 data files.
+p11.12 <- read.table("http://www.stat.ufl.edu/~rrandles/sta4210/Rclassnotes/data/textdatasets/KutnerData/Chapter%2011%20Data%20Sets/CH11PR12.txt", header=FALSE)
+
+# Give it nice column names for conevience:
+colnames(p11.12) <- c("Y","X1")
+
+# Show the data:
+# p11.12
+```
+
+#A
+
+```{r}
+plot(Y ~ X1, data = p11.12)
+model <- lm(Y ~ X1, data = p11.12)
+abline(model)
+summary(model)
+```
+
+#B
+```{r}
+lm1 <- lm(Y ~ X1, data = p11.12)
+MAD <- 1/0.6745 * median(abs(lm1$res - median(lm1$res)))
+ui <- lm1$res/MAD
+
+#Huber:
+w <- ifelse(abs(ui) <= 1.345, 1, 1.345/abs(ui))
+
+lm2 <- lm(Y ~ X1, data = p11.12, weights=w)
+MAD <- 1/0.6745*median(abs(lm2$res - median(lm2$res)))
+ui <- lm2$res/MAD
+
+#Huber: 
+w2 <- ifelse(abs(ui) <= 1.345, 1, 1.345/abs(ui))
+
+lm3 <- lm(Y ~ X1, data = p11.12, weights = w2)
+MAD <- 1/0.6745*median(abs(lm3$res - median(lm3$res)))
+ui <- lm3$res/MAD
+
+w3 <- ifelse(abs(ui) <= 1.345, 1, 1.345/abs(ui))
+
+lm4 <- lm(Y ~ X1, data = p11.12, weights = w3)
+
+```
+Smallest is 1
+
+#C
+
+Y = -236.259 + 5.838 * x
+
+#D
+
+Y = -241.577 + 5.914 * x
+Y = -242.606 + 5.928 * x
+
+<footer>
+</footer>
+
+
+
+ 
+<style>
+.points {
+  font-size:.8em;
+  padding-left:5px;
+  font-weight:bold; 
+  color:#317eac;
+}
+
+.recpoints {
+  font-size:.8em;
+  padding-left:5px;
+  font-weight:bold; 
+  color:#7eac31;
+}
+
+.rrecpoints {
+  font-size:1em;
+  padding-left:5px;
+  font-weight:bold; 
+  color:#7eac31;
+}
+
+.report {
+  font-size:.7em;
+  padding-left:15px;
+  font-weight:normal; 
+  color:#5a5a5a;
+}
+
+.datalink {
+  font-size:.5em;
+  color:#317eac;
+  padding-left:5px;
+}
+
+.headnote {
+  font-size:.6em;
+  color:#787878;
+}
+
+.note {
+  font-size:.8em;
+  color:#787878;
+}
+
+.headpoints {
+ font-size:12pt;
+ color: #585858; 
+ padding-left: 15px;
+}
+ </style>
+
+ 
+
+ 
+
+ 
