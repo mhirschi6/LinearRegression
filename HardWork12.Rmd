@@ -1,0 +1,310 @@
+---
+title: "Hard Work 12"
+output: 
+  html_document:
+    theme: cerulean
+    toc: true
+    toc_float: true
+    code_folding: hide
+---
+
+```{r, message=FALSE, warning=FALSE}
+library(mosaic)
+library(car)
+library(plotly)
+library(reshape2)
+library(scatterplot3d)
+library(tidyverse)
+```
+
+<style>
+
+</style>
+
+## Instructions
+
+1. Study Chapter 14 -- "Logistic Regression, Poisson Regression, and Generalized Linear Models"    
+
+2. Attempt and submit at least <span id=points style="padding-left:0px;">{50}</span> Hard Work Points by Saturday at 11:59 PM.    
+<span id=note>Over <span id=points style="padding-left:0px;">{66}</span> gets you {+1} Final Exam Point.</span>    
+<span id=note>Over <span id=points style="padding-left:0px;">{72}</span> gets you {+2} Final Exam Points.</span>    
+
+
+\
+
+
+## Reading Points <span id=headpoints>{42} Possible</span>
+
+### Section 14.1 <span id=recpoints>{3}</span><span id=report>{ A=3 | E=2 }</span>
+
+### Section 14.2 <span id=recpoints>{3}</span><span id=report>{ A=3 | E=2 }</span>
+
+### Section 14.3 <span id=recpoints>{3}</span><span id=report>{ A=3 | E=2 }</span>
+
+### Section 14.4 <span id=points>{3}</span><span id=report>{ A=3 | E=2 }</span>
+
+### Section 14.5 <span id=points>{3}</span><span id=report>{ A=3 | E=2 }</span>
+
+### Section 14.6 <span id=points>{3}</span><span id=report>{ A=3 | E=2 }</span>
+
+### Section 14.7 <span id=points>{3}</span><span id=report>{ A=3 | E=2 }</span>
+
+### Section 14.8 <span id=points>{3}</span><span id=report>{ A=0 | E=0 }</span>
+
+### Section 14.9 <span id=points>{3}</span><span id=report>{ A=0 | E=0 }</span>
+
+### Section 14.10 <span id=points>{3}</span><span id=report>{ A=0 | E=0 }</span>
+
+### Section 14.11 <span id=points>{3}</span><span id=report>{ A=0 | E=0 }</span>
+
+### Section 14.12 <span id=points>{3}</span><span id=report>{ A=0 | E=0 }</span>
+
+### Section 14.13 <span id=recpoints>{3}</span><span id=report>{ A=3 | E=2 }</span>
+
+### Section 14.14 <span id=points>{3}</span><span id=report>{ A=0 | E=0 }</span>
+
+
+\
+
+
+
+
+
+## Theory Points <span id=headpoints>{6} Possible</span>
+
+### Problem {14.1} <span id=points>{3}</span><span id=report>{ A=3 | E=3 }</span>
+
+The Benoulli Distribution rises just two possibilities "success" or "failure".
+P denotes the probability of success and of failure(1-p). p(0)= (1-p) and p(1)=p.
+
+### Problem {14.3} <span id=points>{3}</span><span id=report>{ A=3 | E=3 }</span>
+
+This would not be a great time to use logisitc regression. We want the response variable to work more on an S-Shape. 
+
+## Application Points <span id=headpoints>{20} Possible</span>
+
+
+### Problem {14.7} <span id=points>{5}</span><span id=report>{ A=5 | E=5 }</span>
+```{r}
+p14.7 <- read.table("http://users.stat.ufl.edu/~rrandles/sta4210/Rclassnotes/data/textdatasets/KutnerData/Chapter%2014%20Data%20Sets/CH14PR07.txt", header = FALSE)
+colnames(p14.7) <- c("Y","X")
+
+```
+A
+```{r}
+p14.7model <- glm(Y ~ X, data = p14.7, family = binomial)
+summary(p14.7model)
+```
+-0.6000
+0.02857
+$$
+\hat{\pi_i} = \frac{e^{-4.80751 + 0.125 X_i}}{1+e6{-4.810751 + 0.125 X_I}}
+$$
+B
+```{r}
+p14.7 %>% 
+  ggplot(aes(x = X, y = Y))+
+  geom_point()+
+  geom_smooth()+
+  stat_smooth(method = "glm", method.args = list(family= "binomial"), col = "green")
+```
+
+C
+```{r}
+exp(0.12508)
+```
+1.133239
+Every increase in X by 1 you ODDS of leaving increase your chances by 13%. 
+D
+```{r}
+predict(p14.7model, data.frame(X = 40, type = "response"))
+```
+0.1956164 
+
+19.56%
+
+E
+```{r}
+y <- log(0.75/(0.25))
+x <- (y + 4.81 / (0.125))
+```
+
+It has to increase by 39.58 Dolllars for 75% to cancel their membership. 
+
+### Problem {14.9} <span id=points>{5}</span><span id=report>{ A=5 | E=5 }</span>
+```{r}
+p14.9 <- read.table("http://users.stat.ufl.edu/~rrandles/sta4210/Rclassnotes/data/textdatasets/KutnerData/Chapter%2014%20Data%20Sets/CH14PR09.txt", header = FALSE)
+colnames(p14.9) <- c("Y","X")
+
+```
+A
+```{r}
+p14.9model <- glm(Y ~ X, data = p14.9, family = binomial)
+summary(p14.9model)
+```
+-0.6000
+0.02857
+$$
+\hat{\pi_i} = \frac{e^{-10.308925 + 0.018920 X_i}}{1+e{-10.308925 + 0.018920 X_I}}
+$$
+B
+```{r}
+p14.9 %>% 
+  ggplot(aes(x = X, y = Y))+
+  geom_point()+
+  geom_smooth()+
+  stat_smooth(method = "glm", method.args = list(family= "binomial"), col = "green")
+```
+
+C
+```{r}
+exp(0.02857)
+```
+When you increase by 1 you increase your chances by 2.9%
+D
+```{r}
+predict(p14.9model, data.frame(X = 550, type = "response"))
+```
+9.6%
+E
+```{r}
+y <- log(0.70/(0.30))
+x <- (y + 10.308925 / (0.018920))
+print(x)
+```
+The expected test score of 545.7165.
+
+
+
+### Problem {14.13} <span id=points>{5}</span><span id=report>{ A=5 | E=5 }</span>
+```{r}
+p14.13 <- read.table("http://users.stat.ufl.edu/~rrandles/sta4210/Rclassnotes/data/textdatasets/KutnerData/Chapter%2014%20Data%20Sets/CH14PR13.txt", header = FALSE)
+colnames(p14.13) <- c("Y","X1","X2")
+
+```
+
+A
+```{r}
+p14.13model <- glm(Y ~ X1 + X2, data = p14.13, family = binomial)
+summary(p14.13model)
+```
+$$
+\hat{\pi_i} = \frac{e^{-4.73931 + 0.06773 X_\text{i1} + 0.59863 X_\text{i2}}} {1+e6{-4.73931 + 0.06773 X_\text{i1}}+ 0.59863 X_\text{i2}} 
+$$
+B
+
+```{r}
+exp(0.06773)
+exp(0.59863)
+```
+C
+```{r}
+predict(p14.13model, data.frame(X1 = 50000, X2 = 3), type = "response")
+```
+
+### Problem {14.14} <span id=points>{5}</span><span id=report>{ A=5 | E=5 }</span>
+```{r}
+p14.14 <- read.table("http://users.stat.ufl.edu/~rrandles/sta4210/Rclassnotes/data/textdatasets/KutnerData/Chapter%2014%20Data%20Sets/CH14PR14.txt", header = FALSE)
+colnames(p14.14) <- c("Y","X1","X2","X3")
+```
+A
+```{r}
+
+p14.14model <- glm(Y ~ X1 + X2 + X3, data = p14.14, family = binomial)
+summary(p14.14model)
+```
+$$
+\hat{\pi_i} = \frac{e^{-1.17716 + 0.07279 X_\text{i1} + (-0.09899) X_\text{i2} + 0.43397 X_\text{i3}}} {1+e6{-1.7716 + 0.07279 X_\text{i1}}+ (-0.09899) X_\text{i2} + 0.43397 X_\text{i3}} 
+$$
+
+
+
+B
+```{r}
+exp(0.07279)
+exp(-0.09899)
+exp(0.43397)
+
+```
+X1 is a 7.5 % of increase.
+X2 is a 10% decrease.
+X3 is a 54% increase. 
+
+
+C
+```{r}
+predict(p14.14model, data.frame(X1= 55, X2 = 60, X3 = 1), type = "response")
+```
+
+The probability of 55 year olds with a health index of 60 to recieive the flu shot is 6.4%. 
+
+<style>
+#points {
+  font-size:.8em;
+  padding-left:5px;
+  font-weight:bold; 
+  color:#317eac;
+}
+
+#recpoints {
+  font-size:.8em;
+  padding-left:5px;
+  font-weight:bold; 
+  color:#7eac31;
+}
+
+
+#rrecpoints {
+  font-size:1em;
+  padding-left:5px;
+  font-weight:bold; 
+  color:#7eac31;
+}
+
+#datalink {
+  font-size:.5em;
+  color:#317eac;
+  padding-left:5px;
+}
+
+#headnote {
+  font-size:.6em;
+  color:#787878;
+}
+
+#note {
+  font-size:.8em;
+  color:#787878;
+}
+
+#headpoints {
+ font-size:12pt;
+ color: #585858; 
+ padding-left: 15px;
+}
+
+
+
+#report {
+  font-size:.7em;
+  padding-left:15px;
+  font-weight:normal; 
+  color:#5a5a5a;
+}
+
+
+</style>
+
+
+<footer>
+</footer>
+
+
+
+ 
+
+ 
+
+ 
+
+ 

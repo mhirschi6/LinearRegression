@@ -396,3 +396,51 @@ mymeanswend <- mean(births ~ wend, data = subset(b78, wend == "Weekend" & dayofy
 
 
 abline(h = mymeans, col = c("skyblue", "firebrick"))
+
+
+#logistic regression
+##bad idea
+plot(Fail > 0 ~ Temp, data = challeng)
+lm1 <- lm(Fail > 0 ~ Temp, data = challeng)
+abline(lm1)
+
+## good idea
+plot(Fail > 0 ~ Temp, data = challeng)
+glm1 <- glm(Fail > 0 ~ Temp, data = challeng, family = binomial())
+b <- coef(glm1)
+curve(exp(b[1] + b[2]*x)/(1+exp(b[1]+b[2]*x)), add = TRUE)
+
+predict(glm1, data.frame(Temp = c(31,60)), type = "response")
+#predict(glm1, data.frame(Temp = 60), type = "response")
+summary(glm1)
+
+
+
+challeng %>% 
+  ggplot(aes(x = Temp, y = as.numeric(Fail > 0)))+
+  geom_point()+
+  geom_smooth()+
+  stat_smooth(method = "glm", method.args = list(family= "binomial"))
+
+# PIEi = probability of success piei / 1-piei
+#probabililty = 3/10
+#Odds = 3/7
+              
+curve(x/(1-x), from = 0, to = 1)
+abline(abline(v = 1, lty = 2))
+curve(log(x/(1-x)), from = 0, to = 1, add = TRUE, col = "green")
+
+#log(ODDS) = B0 + B1Xi
+
+
+#Find the p-value
+
+carslm <- lm(dist ~ speed, data = cars)
+summary(carslm)
+
+t = (3.9324 - 0)/0.4155
+2*pt(abs(t),48, lower.tail = FALSE)
+confint(carslm)
+
+predict(carslm, data.frame(speed = 12), interval = "prediction")
+predict(carslm, data.frame(speed = 12), interval = "confidence")
